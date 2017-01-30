@@ -24,4 +24,4 @@ endif(WIN32)
 
 add_library(utf8string STATIC ${headers_} ${sources_})
 
-# add_subdirectory(tests)
+add_subdirectory(tests)

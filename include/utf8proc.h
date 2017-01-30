@@ -113,6 +113,8 @@ typedef bool utf8proc_bool;
 #endif
 #include <limits.h>
 
+#    define UTF8PROC_DLLEXPORT
+/*
 #ifdef _WIN32
 #  ifdef UTF8PROC_EXPORTS
 #    define UTF8PROC_DLLEXPORT __declspec(dllexport)
@@ -124,6 +126,7 @@ typedef bool utf8proc_bool;
 #else
 #  define UTF8PROC_DLLEXPORT
 #endif
+*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -567,7 +570,7 @@ UTF8PROC_DLLEXPORT utf8proc_int32_t utf8proc_totitle(utf8proc_int32_t c);
  * Given a codepoint, return a character width analogous to `wcwidth(codepoint)`,
  * except that a width of 0 is returned for non-printable codepoints
  * instead of -1 as in `wcwidth`.
- * 
+ *
  * @note
  * If you want to check for particular types of non-printable characters,
  * (analogous to `isprint` or `iscntrl`), use @ref utf8proc_category. */
