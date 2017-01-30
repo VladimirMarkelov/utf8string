@@ -32,4 +32,8 @@
 *.dSYM/
 *.su
 
+# CMAKE
 build/*
+
+# editors
+*.swp

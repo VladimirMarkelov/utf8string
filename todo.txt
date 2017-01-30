@@ -1,4 +1,7 @@
-﻿struct utf8str {
+﻿c:\Users\vladimir.markelov\Utils\CMake\bin\cmake.exe -H. -Bbuild
+c:\Users\vladimir.markelov\Utils\CMake\bin\cmake.exe -H. -Bbuild -G "MinGW Makefiles"
+
+struct utf8str {
     char *
     size_t cap
     size_t size // in bytes (-1 has not calculated yet)
