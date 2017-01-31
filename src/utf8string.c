@@ -10,7 +10,7 @@
 
 #define UTF8_LOGFILE "utf8string.log"
 
-size_t utf8str_len(const char *str) {
+size_t utf8str_count(const char *str) {
     if (str == NULL || *str == '\0') {
         return 0;
     }

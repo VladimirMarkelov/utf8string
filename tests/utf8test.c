@@ -12,11 +12,11 @@ const char* test_strlen() {
     char *ascii = "example";
     char *utfstr = "пример";
 
-    ut_assert("NULL string length", utf8str_len(NULL) == 0);
-    ut_assert("Empty string length", utf8str_len("") == 0);
-    ut_assert("ASCII string length", utf8str_len("example") == strlen("example"));
-    ut_assert("UTF8 string length", utf8str_len("-пример-") == 8);
-    ut_assert("Invalid string length", utf8str_len("\xf8\xe3") == -1);
+    ut_assert("NULL string length", utf8str_count(NULL) == 0);
+    ut_assert("Empty string length", utf8str_count("") == 0);
+    ut_assert("ASCII string length", utf8str_count("example") == strlen("example"));
+    ut_assert("UTF8 string length", utf8str_count("-пример-") == 8);
+    ut_assert("Invalid string length", utf8str_count("\xf8\xe3") == -1);
 
     return 0;
 }

@@ -15,15 +15,11 @@ enum utf8_error {
 };
 
 /* Basic operations */
-size_t utf8str_len(const char *str);
+size_t utf8str_count(const char *str);
 size_t utf8str_char_length(const char *str);
 enum utf8_error utf8str_is_valid(const char *str, size_t len);
 
 /*
-str_cat - char & char*
-is_valid - check if it contains valid utf
-count - number of utf8 symbols
-len - number of bytes used
 delete - char, substring, and (from, to)
 insert - substring and char
 append - substring and char
