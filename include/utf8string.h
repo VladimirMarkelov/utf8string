@@ -6,24 +6,24 @@ extern "C"
 {
 #endif
 
-enum utf8_error {
+enum utf8_result {
     UTF8_OK,
     UTF8_INVALID_ARG,
     UTF8_INVALID_UTF,
     UTF8_UNFINISHED,
     UTF8_TOO_SHORT,
+    UTF8_BUFFER_SMALL,
 };
 
 /* Basic operations */
 size_t utf8str_count(const char *str);
 size_t utf8str_char_length(const char *str);
-enum utf8_error utf8str_is_valid(const char *str, size_t len);
-const char* utf8_at_index(const char *str, ssize_t index);
+enum utf8_result utf8str_is_valid(const char *str, size_t len);
+const char* utf8str_at_index(const char *str, ssize_t index);
+enum utf8_result utf8str_upcase(const char *src, char *dest, size_t *dest_sz);
+enum utf8_result utf8str_lowcase(const char *src, char *dest, size_t *dest_sz);
 
 /*
-at - utf8 symbol at position
-upcase
-lowcase
 compare
 compare_no_case
 utf8width - for the object, char, char*

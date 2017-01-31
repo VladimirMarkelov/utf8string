@@ -40,10 +40,50 @@ const char* test_utf_valid() {
     return 0;
 }
 
+const char* test_utf_at() {
+    char *ascii = "example";
+    char *utfstr = "пример";
+
+    ut_assert("NULL string at", utf8str_at_index(NULL, 2) == NULL);
+    ut_assert("Short string at", utf8str_at_index(ascii, 10) == NULL);
+    ut_assert("Short string at [negative]", utf8str_at_index(ascii, -10) == NULL);
+    ut_assert("ASCII string at", utf8str_at_index(ascii, 5) != NULL && (*utf8str_at_index(ascii, 5) == 'l'));
+    ut_assert("ASCII string at [negative]", utf8str_at_index(ascii, -3) != NULL && (*utf8str_at_index(ascii, -3) == 'p'));
+    ut_assert("UTF string at", utf8str_at_index(utfstr, 2) != NULL && (*utf8str_at_index(utfstr, 2) == utfstr[4]));
+    ut_assert("UTF string at [negative]", utf8str_at_index(utfstr, -2) != NULL && (*utf8str_at_index(utfstr, -2) == utfstr[8]));
+
+    return 0;
+}
+
+const char* test_utf_cases() {
+    char *str = "exAmpLe пРимЕр";
+    char *invstr = "exAmpLe\x89\xe6 пРимЕр";
+    char buf[48];
+    char *easy = "ex";
+    size_t sz = 20;
+
+    ut_assert("NULL string case", utf8str_upcase(NULL, NULL, &sz) == UTF8_INVALID_ARG);
+    ut_assert("No size case", utf8str_upcase(str, buf, NULL) == UTF8_OK && strcmp(buf, "EXAMPLE ПРИМЕР") == 0);
+    sz = 10;
+    ut_assert("No dest case", utf8str_upcase(easy, buf, &sz) == UTF8_OK && strcmp(buf, "EX") == 0 && sz == 8);
+    sz = 48;
+    ut_assert("All case", utf8str_lowcase(str, buf, NULL) == UTF8_OK && strcmp(buf, "example пример") == 0);
+    sz = 48;
+    ut_assert("Invalid string case", utf8str_lowcase(invstr, buf, NULL) == UTF8_INVALID_UTF);
+    sz = 10;
+    ut_assert("Small destination case", utf8str_lowcase(str, buf, &sz) == UTF8_BUFFER_SMALL);
+    sz = 10;
+    ut_assert("Empty dest case", utf8str_upcase(easy, NULL, &sz) == UTF8_OK && sz == 8);
+
+    return 0;
+}
+
 const char * run_all_test() {
     printf("=== Basic operations ===\n");
     ut_run_test("String Length", test_strlen);
     ut_run_test("Valid UTF", test_utf_valid);
+    ut_run_test("Char at", test_utf_at);
+    ut_run_test("Lowcase and Upcase", test_utf_cases);
     return 0;
 }
 
