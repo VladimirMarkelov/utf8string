@@ -18,11 +18,9 @@ enum utf8_error {
 size_t utf8str_count(const char *str);
 size_t utf8str_char_length(const char *str);
 enum utf8_error utf8str_is_valid(const char *str, size_t len);
+const char* utf8_at_index(const char *str, ssize_t index);
 
 /*
-delete - char, substring, and (from, to)
-insert - substring and char
-append - substring and char
 at - utf8 symbol at position
 upcase
 lowcase
@@ -47,6 +45,32 @@ is_letter_upcase
 is_letter_lowcase
 is_punct
 */
+
+/*
+2. Nice to have
+str_char_iterator
+str_word_iterator
+reverse
+upcase_first
+lowcase_first
+title_case
+split/split_next(?)
+scrub - replace invalid utf characters with placeholder
+translate - tr/abc/def/
+word_count
+str_srch_right
+repeat
+chomp - remove the suffix
+
+3. Maybe
+justify - add spaces between words to make the string *width* if the string is longer than *limit*
+center - add spaces from start and to end until *width* is reached
+right_justify - add spaces to end until *width* is reached
+left_justify - add spaces from start until *width* is reached
+expand_tabs - convert tabs to spaces
+squeeze - remove duplicate spaces
+substr_count - number of occurances substr in string
+ */
 
 #ifdef __cplusplus
 }

@@ -94,3 +94,10 @@ enum utf8_error utf8str_is_valid(const char *str, size_t len) {
     return len == 0 ? UTF8_OK : UTF8_TOO_SHORT;
 }
 
+const char* utf8_at_index(const char *str, ssize_t index) {
+    if (str == NULL || index == 0) {
+        return str;
+    }
+
+    return str;
+}
