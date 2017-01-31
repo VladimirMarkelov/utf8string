@@ -1,5 +1,24 @@
+#ifndef UTF8STRING_20170130
+#define UTF8STRING_20170130
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+enum utf8_error {
+    UTF8_OK,
+    UTF8_INVALID_ARG,
+    UTF8_INVALID_UTF,
+    UTF8_UNFINISHED,
+    UTF8_TOO_SHORT,
+};
+
 /* Basic operations */
 size_t utf8str_len(const char *str);
+size_t utf8str_char_length(const char *str);
+enum utf8_error utf8str_is_valid(const char *str, size_t len);
+
 /*
 str_cat - char & char*
 is_valid - check if it contains valid utf
@@ -32,3 +51,9 @@ is_letter_upcase
 is_letter_lowcase
 is_punct
 */
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /*UTF8STRING_20170130*/
