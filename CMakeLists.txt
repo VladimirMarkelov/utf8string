@@ -27,6 +27,6 @@ else()
     set(platformDir_ Posix)
 endif(WIN32)
 
-add_library(utf8string STATIC ${headers_} ${sources_})
+add_library(utf8string STATIC ${sources_})
 
 add_subdirectory(tests)
