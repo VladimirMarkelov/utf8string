@@ -79,16 +79,22 @@ const char* test_utf_cases() {
 }
 
 const char* test_utf_iequal() {
-    ut_assert("NULL strings equal", utf8str_iequal(NULL, NULL) == UTF8_EQUAL);
-    ut_assert("NULL string and non-NULL equal 1", utf8str_iequal("a", NULL) == UTF8_NEQUAL);
-    ut_assert("NULL string and non-NULL equal 2", utf8str_iequal(NULL, "b") == UTF8_NEQUAL);
-    ut_assert("ASCII string equal", utf8str_iequal("aBc", "Abc") == UTF8_EQUAL);
-    ut_assert("ASCII string nequal", utf8str_iequal("aBd", "Abc") == UTF8_NEQUAL);
-    ut_assert("ASCII string different length 1", utf8str_iequal("aBcd", "Abc") == UTF8_NEQUAL);
-    ut_assert("ASCII string different length 2", utf8str_iequal("aBcd", "AbcDe") == UTF8_NEQUAL);
-    ut_assert("UTF string equal", utf8str_iequal("приМер", "прИмЕр") == UTF8_EQUAL);
-    ut_assert("UTF string nequal", utf8str_iequal("приМэр", "прИмЕр") == UTF8_NEQUAL);
-    ut_assert("UTF string different length", utf8str_iequal("приМер", "прИмЕры") == UTF8_NEQUAL);
+    ut_assert("NULL strings equal", utf8str_equal_no_case(NULL, NULL) == UTF8_EQUAL);
+    ut_assert("NULL string and non-NULL equal 1", utf8str_equal_no_case("a", NULL) == UTF8_NEQUAL);
+    ut_assert("NULL string and non-NULL equal 2", utf8str_equal_no_case(NULL, "b") == UTF8_NEQUAL);
+    ut_assert("ASCII string equal", utf8str_equal_no_case("aBc", "Abc") == UTF8_EQUAL);
+    ut_assert("ASCII string not equal", utf8str_equal_no_case("aBd", "Abc") == UTF8_NEQUAL);
+    ut_assert("ASCII string different length 1", utf8str_equal_no_case("aBcd", "Abc") == UTF8_NEQUAL);
+    ut_assert("ASCII string different length 2", utf8str_equal_no_case("aBcd", "AbcDe") == UTF8_NEQUAL);
+    ut_assert("UTF string equal", utf8str_equal_no_case("приМер", "прИмЕр") == UTF8_EQUAL);
+    ut_assert("UTF string not equal", utf8str_equal_no_case("приМэр", "прИмЕр") == UTF8_NEQUAL);
+    ut_assert("UTF string different length", utf8str_equal_no_case("приМер", "прИмЕры") == UTF8_NEQUAL);
+
+    ut_assert("ASCII string equal partially", utf8str_nequal_no_case("aBce", "Abcd", 3) == UTF8_EQUAL);
+    ut_assert("UTF string equal partially", utf8str_nequal_no_case("приМэр", "прИмЕр", 4) == UTF8_EQUAL);
+    ut_assert("ASCII string nequal short strings", utf8str_nequal_no_case("aBc", "Abc", 6) == UTF8_EQUAL);
+    ut_assert("ASCII string not nequal short strings", utf8str_nequal_no_case("aBcd", "Abce", 6) == UTF8_NEQUAL);
+    ut_assert("ASCII string not nequal different lengths", utf8str_nequal_no_case("aBcd", "Abcde", 6) == UTF8_NEQUAL);
     return 0;
 }
 

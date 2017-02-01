@@ -24,13 +24,13 @@ enum utf8_result utf8str_is_valid(const char *str, size_t len);
 const char* utf8str_at_index(const char *str, ssize_t index);
 enum utf8_result utf8str_upcase(const char *src, char *dest, size_t *dest_sz);
 enum utf8_result utf8str_lowcase(const char *src, char *dest, size_t *dest_sz);
-enum utf8_result utf8str_iequal(const char *orig, const char *cmp);
+enum utf8_result utf8str_equal_no_case(const char *orig, const char *cmp);
+enum utf8_result utf8str_nequal_no_case(const char *orig, const char *cmp, size_t len);
 
 /*
 utf8width - for the object, char, char*
 utf8width_first - first char of char*
 substring
-str_srch - cp, char & char*
 starts_with
 end_with
 replace
