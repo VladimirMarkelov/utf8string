@@ -78,12 +78,27 @@ const char* test_utf_cases() {
     return 0;
 }
 
+const char* test_utf_iequal() {
+    ut_assert("NULL strings equal", utf8str_iequal(NULL, NULL) == UTF8_EQUAL);
+    ut_assert("NULL string and non-NULL equal 1", utf8str_iequal("a", NULL) == UTF8_NEQUAL);
+    ut_assert("NULL string and non-NULL equal 2", utf8str_iequal(NULL, "b") == UTF8_NEQUAL);
+    ut_assert("ASCII string equal", utf8str_iequal("aBc", "Abc") == UTF8_EQUAL);
+    ut_assert("ASCII string nequal", utf8str_iequal("aBd", "Abc") == UTF8_NEQUAL);
+    ut_assert("ASCII string different length 1", utf8str_iequal("aBcd", "Abc") == UTF8_NEQUAL);
+    ut_assert("ASCII string different length 2", utf8str_iequal("aBcd", "AbcDe") == UTF8_NEQUAL);
+    ut_assert("UTF string equal", utf8str_iequal("приМер", "прИмЕр") == UTF8_EQUAL);
+    ut_assert("UTF string nequal", utf8str_iequal("приМэр", "прИмЕр") == UTF8_NEQUAL);
+    ut_assert("UTF string different length", utf8str_iequal("приМер", "прИмЕры") == UTF8_NEQUAL);
+    return 0;
+}
+
 const char * run_all_test() {
     printf("=== Basic operations ===\n");
     ut_run_test("String Length", test_strlen);
     ut_run_test("Valid UTF", test_utf_valid);
     ut_run_test("Char at", test_utf_at);
     ut_run_test("Lowcase and Upcase", test_utf_cases);
+    ut_run_test("Compare no case", test_utf_iequal);
     return 0;
 }
 

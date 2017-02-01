@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -203,4 +204,37 @@ enum utf8_result utf8str_lowcase(const char *src, char *dest, size_t *dest_sz) {
 }
 
 enum utf8_result utf8str_iequal(const char *orig, const char *cmp) {
+    if (orig == NULL && cmp == NULL) {
+        return UTF8_EQUAL;
+    }
+    if (orig == NULL || cmp == NULL) {
+        return UTF8_NEQUAL;
+    }
+
+    size_t len;
+    utf8proc_uint8_t *uorig = (utf8proc_uint8_t*)orig;
+    utf8proc_uint8_t *ucmp = (utf8proc_uint8_t*)cmp;
+    utf8proc_int32_t cporig, cpcmp;
+
+    while (*uorig && *ucmp) {
+        len = utf8proc_iterate(uorig, -1, &cporig);
+        if (cporig == -1) {
+            return UTF8_INVALID_UTF;
+        }
+        uorig += len;
+        cporig = utf8proc_toupper(cporig);
+
+        len = utf8proc_iterate(ucmp, -1, &cpcmp);
+        if (cpcmp == -1) {
+            return UTF8_INVALID_UTF;
+        }
+        ucmp += len;
+        cpcmp = utf8proc_toupper(cpcmp);
+
+        if (cporig != cpcmp) {
+            return UTF8_NEQUAL;
+        }
+    }
+
+    return (*uorig == '\0' && *ucmp == '\0') ? UTF8_EQUAL : UTF8_NEQUAL;
 }
