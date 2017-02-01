@@ -202,3 +202,5 @@ enum utf8_result utf8str_lowcase(const char *src, char *dest, size_t *dest_sz) {
     return process_utf8str(src, dest, dest_sz, utf8proc_tolower);
 }
 
+enum utf8_result utf8str_iequal(const char *orig, const char *cmp) {
+}
