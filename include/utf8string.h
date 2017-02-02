@@ -26,25 +26,22 @@ enum utf8_result utf8str_upcase(const char *src, char *dest, size_t *dest_sz);
 enum utf8_result utf8str_lowcase(const char *src, char *dest, size_t *dest_sz);
 enum utf8_result utf8str_equal_no_case(const char *orig, const char *cmp);
 enum utf8_result utf8str_nequal_no_case(const char *orig, const char *cmp, size_t len);
+enum utf8_result utf8str_starts_with(const char *orig, const char *cmp);
+enum utf8_result utf8str_ends_with(const char *orig, const char *cmp);
+int utf8str_isdigit(const char *str);
+int utf8str_isspace(const char *str);
+int utf8str_ispunct(const char *str);
+int utf8str_islower(const char *str);
+int utf8str_isupper(const char *str);
+int utf8str_iscntrl(const char *str);
+int utf8str_isalpha(const char *str);
+int utf8str_isprint(const char *str);
 
 /*
 utf8width - for the object, char, char*
 utf8width_first - first char of char*
 substring
-starts_with
-end_with
-replace
-trim
-trim_right
-trim_left
 back - find the first byte of the symbol under pointer
-last - go to last symbol
-is_digit
-is_whitespace
-is_letter
-is_letter_upcase
-is_letter_lowcase
-is_punct
 */
 
 /*

@@ -247,3 +247,170 @@ enum utf8_result utf8str_nequal_no_case(const char *orig, const char *cmp, size_
 
     return (*uorig == '\0' && *ucmp == '\0') ? UTF8_EQUAL : UTF8_NEQUAL;
 }
+
+
+enum utf8_result utf8str_starts_with(const char *orig, const char *cmp) {
+    if (orig == NULL && cmp == NULL) {
+        return UTF8_EQUAL;
+    }
+    if (orig == NULL || cmp == NULL) {
+        return UTF8_NEQUAL;
+    }
+
+    size_t cnt = 0;
+    utf8proc_uint8_t *uorig = (utf8proc_uint8_t*)orig;
+    utf8proc_uint8_t *ucmp = (utf8proc_uint8_t*)cmp;
+    utf8proc_int32_t cporig, cpcmp;
+
+    while (*uorig && *ucmp) {
+        cnt = utf8proc_iterate(uorig, -1, &cporig);
+        if (cporig == -1) {
+            return UTF8_INVALID_UTF;
+        }
+        uorig += cnt;
+
+        cnt = utf8proc_iterate(ucmp, -1, &cpcmp);
+        if (cpcmp == -1) {
+            return UTF8_INVALID_UTF;
+        }
+        ucmp += cnt;
+
+        if (cporig != cpcmp) {
+            return UTF8_NEQUAL;
+        }
+    }
+
+    return (*ucmp == '\0') ? UTF8_EQUAL : UTF8_NEQUAL;
+}
+
+enum utf8_result utf8str_ends_with(const char *orig, const char *cmp) {
+    if (orig == NULL && cmp == NULL) {
+        return UTF8_EQUAL;
+    }
+    if (orig == NULL || cmp == NULL) {
+        return UTF8_NEQUAL;
+    }
+
+    size_t cmplen = utf8str_count(cmp);
+    if (cmplen == (size_t)-1) {
+        return UTF8_INVALID_UTF;
+    }
+    const char *ends = utf8str_at_index(orig, -(ssize_t)cmplen);
+    if (ends == NULL) {
+        return UTF8_NEQUAL;
+    }
+
+    return utf8str_starts_with(ends, cmp);
+}
+
+static utf8proc_category_t utf8str_get_category(const char *str) {
+    if (str == NULL || *str == '\0') {
+        return -1;
+    }
+
+    utf8proc_uint8_t *ustr = (utf8proc_uint8_t*)str;
+    utf8proc_int32_t cp;
+    size_t cnt = utf8proc_iterate(ustr, -1, &cp);
+    if (cp == -1) {
+        return -1;
+    }
+
+    return utf8proc_category(cp);
+}
+
+int utf8str_isdigit(const char *str) {
+    utf8proc_category_t ctg = utf8str_get_category(str);
+    if (ctg == -1) {
+        return 0;
+    }
+
+    return ctg == UTF8PROC_CATEGORY_ND ||
+           ctg == UTF8PROC_CATEGORY_NL ||
+           ctg == UTF8PROC_CATEGORY_NO;
+}
+
+int utf8str_isspace(const char *str) {
+    utf8proc_category_t ctg = utf8str_get_category(str);
+    if (ctg == -1) {
+        return 0;
+    }
+
+    return ctg == UTF8PROC_CATEGORY_ZS ||
+           (*str >= 0x09 && *str <= 0x0D);
+}
+
+int utf8str_ispunct(const char *str) {
+    utf8proc_category_t ctg = utf8str_get_category(str);
+    if (ctg == -1) {
+        return 0;
+    }
+
+    return ctg == UTF8PROC_CATEGORY_PC ||
+           ctg == UTF8PROC_CATEGORY_PD ||
+           ctg == UTF8PROC_CATEGORY_PS ||
+           ctg == UTF8PROC_CATEGORY_PE ||
+           ctg == UTF8PROC_CATEGORY_PF ||
+           ctg == UTF8PROC_CATEGORY_PO ||
+           ctg == UTF8PROC_CATEGORY_PI;
+}
+
+int utf8str_islower(const char *str) {
+    utf8proc_category_t ctg = utf8str_get_category(str);
+    if (ctg == -1) {
+        return 0;
+    }
+
+    return ctg == UTF8PROC_CATEGORY_LL;
+}
+
+int utf8str_isupper(const char *str) {
+    utf8proc_category_t ctg = utf8str_get_category(str);
+    if (ctg == -1) {
+        return 0;
+    }
+
+    return ctg == UTF8PROC_CATEGORY_LU ||
+           ctg == UTF8PROC_CATEGORY_LT;
+}
+
+int utf8str_iscntrl(const char *str) {
+    utf8proc_category_t ctg = utf8str_get_category(str);
+    if (ctg == -1) {
+        return 0;
+    }
+
+    return ctg == UTF8PROC_CATEGORY_CC;
+}
+
+int utf8str_isalpha(const char *str) {
+    utf8proc_category_t ctg = utf8str_get_category(str);
+    if (ctg == -1) {
+        return 0;
+    }
+
+    return ctg == UTF8PROC_CATEGORY_LU ||
+           ctg == UTF8PROC_CATEGORY_LL ||
+           ctg == UTF8PROC_CATEGORY_LO ||
+           ctg == UTF8PROC_CATEGORY_LT;
+}
+
+int utf8str_isprint(const char *str) {
+    utf8proc_category_t ctg = utf8str_get_category(str);
+    if (ctg == -1) {
+        return 0;
+    }
+
+    return ctg != UTF8PROC_CATEGORY_CN &&
+           ctg != UTF8PROC_CATEGORY_LM &&
+           ctg != UTF8PROC_CATEGORY_MN &&
+           ctg != UTF8PROC_CATEGORY_ME &&
+           ctg != UTF8PROC_CATEGORY_MC &&
+           ctg != UTF8PROC_CATEGORY_ZS &&
+           ctg != UTF8PROC_CATEGORY_ZL &&
+           ctg != UTF8PROC_CATEGORY_ZP &&
+           ctg != UTF8PROC_CATEGORY_CC &&
+           ctg != UTF8PROC_CATEGORY_CF &&
+           ctg != UTF8PROC_CATEGORY_CO &&
+           ctg != UTF8PROC_CATEGORY_CS &&
+           ctg != UTF8PROC_CATEGORY_CN;
+}

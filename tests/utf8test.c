@@ -98,6 +98,47 @@ const char* test_utf_iequal() {
     return 0;
 }
 
+const char* test_utf_starts() {
+    ut_assert("NULL strings starts", utf8str_starts_with(NULL, NULL) == UTF8_EQUAL);
+    ut_assert("Equal strings starts", utf8str_starts_with("abc", "abc") == UTF8_EQUAL);
+    ut_assert("Longer orig strings starts", utf8str_starts_with("abcd", "abc") == UTF8_EQUAL);
+    ut_assert("Longer cmp strings starts", utf8str_starts_with("abc", "abcd") == UTF8_NEQUAL);
+    ut_assert("Unequal strings starts", utf8str_starts_with("abcdef", "abchgj") == UTF8_NEQUAL);
+
+    ut_assert("NULL strings ends", utf8str_ends_with(NULL, NULL) == UTF8_EQUAL);
+    ut_assert("Equal strings ends", utf8str_ends_with("abc", "abc") == UTF8_EQUAL);
+    ut_assert("Longer orig strings ends", utf8str_ends_with("dabc", "abc") == UTF8_EQUAL);
+    ut_assert("Longer cmp strings ends", utf8str_ends_with("abc", "abcd") == UTF8_NEQUAL);
+    ut_assert("Unequal strings ends", utf8str_ends_with("abcdef", "abchgj") == UTF8_NEQUAL);
+    ut_assert("UTF Equal strings ends", utf8str_ends_with("пример", "мер") == UTF8_EQUAL);
+    ut_assert("UTF unequal strings ends", utf8str_ends_with("пример", "прима") == UTF8_NEQUAL);
+    return 0;
+}
+
+const char* test_utf_categories() {
+    ut_assert("NULL is not digit", !utf8str_isdigit(NULL));
+    ut_assert("Empty string is not digit", !utf8str_isdigit(""));
+    ut_assert("1a is digit", utf8str_isdigit("1a"));
+    ut_assert("a1 is not digit", !utf8str_isdigit("a1"));
+    ut_assert("ASCII isupper", utf8str_isupper("A"));
+    ut_assert("ASCII not isupper", !utf8str_isupper("a"));
+    ut_assert("ASCII islower", utf8str_islower("z"));
+    ut_assert("ASCII not islower", !utf8str_islower("Z"));
+    ut_assert("ASCII isalpha", utf8str_isalpha("y"));
+    ut_assert("ASCII iscntrl", utf8str_iscntrl("\x8"));
+    ut_assert("ASCII isspace space", utf8str_isspace(" "));
+    ut_assert("ASCII isspace tab", utf8str_isspace("\x9 "));
+    ut_assert("ASCII ispunct -", utf8str_ispunct("-"));
+    ut_assert("ASCII ispunct .", utf8str_ispunct("."));
+    ut_assert("UTF isupper", utf8str_isupper("Ф"));
+    ut_assert("UTF not isupper", !utf8str_isupper("ф"));
+    ut_assert("UTF islower", utf8str_islower("á"));
+    ut_assert("UTF not islower", !utf8str_islower("Á"));
+    ut_assert("UTF isalpha", utf8str_isalpha("ŋ"));
+
+    return 0;
+}
+
 const char * run_all_test() {
     printf("=== Basic operations ===\n");
     ut_run_test("String Length", test_strlen);
@@ -105,6 +146,8 @@ const char * run_all_test() {
     ut_run_test("Char at", test_utf_at);
     ut_run_test("Lowcase and Upcase", test_utf_cases);
     ut_run_test("Compare no case", test_utf_iequal);
+    ut_run_test("Starts and ends with", test_utf_starts);
+    ut_run_test("Categories", test_utf_categories);
     return 0;
 }
 
