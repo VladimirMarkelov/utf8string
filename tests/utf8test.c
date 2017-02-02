@@ -139,6 +139,17 @@ const char* test_utf_categories() {
     return 0;
 }
 
+const char* test_utf_width() {
+    ut_assert("NULL width", utf8str_width(NULL, 10) == 0);
+    ut_assert("Empty string width", utf8str_width("", 10) == 0);
+    ut_assert("ASCII string width", utf8str_width("abcd", 10) == 4);
+    ut_assert("ASCII char width", utf8str_width("abcd", 1) == 1);
+    ut_assert("Non-printable width", utf8str_width("\x08\x04\x11u\x12", 0) == 1);
+    ut_assert("UTF string width", utf8str_width("пример", 0) == 6);
+    ut_assert("UTF char width", utf8str_width("пример", 1) == 1);
+    return 0;
+}
+
 const char * run_all_test() {
     printf("=== Basic operations ===\n");
     ut_run_test("String Length", test_strlen);
@@ -148,6 +159,7 @@ const char * run_all_test() {
     ut_run_test("Compare no case", test_utf_iequal);
     ut_run_test("Starts and ends with", test_utf_starts);
     ut_run_test("Categories", test_utf_categories);
+    ut_run_test("Width", test_utf_width);
     return 0;
 }
 

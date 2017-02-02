@@ -36,6 +36,7 @@ int utf8str_isupper(const char *str);
 int utf8str_iscntrl(const char *str);
 int utf8str_isalpha(const char *str);
 int utf8str_isprint(const char *str);
+size_t utf8str_width(const char *str, size_t len);
 
 /*
 utf8width - for the object, char, char*

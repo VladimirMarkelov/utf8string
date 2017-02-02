@@ -414,3 +414,32 @@ int utf8str_isprint(const char *str) {
            ctg != UTF8PROC_CATEGORY_CS &&
            ctg != UTF8PROC_CATEGORY_CN;
 }
+
+size_t utf8str_width(const char *str, size_t len) {
+    if (str == NULL || *str == '\0') {
+        return 0;
+    }
+
+    size_t width = 0;
+    size_t cnt = 0, sz;
+    utf8proc_uint8_t *ustr = (utf8proc_uint8_t*)str;
+    utf8proc_int32_t cp;
+    while (*ustr) {
+        sz = utf8proc_iterate(ustr, -1, &cp);
+
+        if (cp == -1) {
+            return (size_t)-1;
+        }
+
+        width += utf8proc_charwidth(cp);
+
+        ustr += sz;
+        cnt++;
+
+        if (len > 0 && cnt == len) {
+            return width;
+        }
+    }
+
+    return width;
+}
