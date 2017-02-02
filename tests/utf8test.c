@@ -63,9 +63,11 @@ const char* test_utf_cases() {
     size_t sz = 20;
 
     ut_assert("NULL string case", utf8str_upcase(NULL, NULL, &sz) == UTF8_INVALID_ARG);
+    int r = utf8str_upcase(str, NULL, &sz);
+    ut_assert("Detect size case", utf8str_upcase(str, NULL, &sz) == UTF8_OK && sz == 20);
     ut_assert("No size case", utf8str_upcase(str, buf, NULL) == UTF8_OK && strcmp(buf, "EXAMPLE ПРИМЕР") == 0);
     sz = 10;
-    ut_assert("No dest case", utf8str_upcase(easy, buf, &sz) == UTF8_OK && strcmp(buf, "EX") == 0 && sz == 8);
+    ut_assert("No dest case", utf8str_upcase(easy, buf, &sz) == UTF8_OK && strcmp(buf, "EX") == 0 && sz == 2);
     sz = 48;
     ut_assert("All case", utf8str_lowcase(str, buf, NULL) == UTF8_OK && strcmp(buf, "example пример") == 0);
     sz = 48;
@@ -73,7 +75,7 @@ const char* test_utf_cases() {
     sz = 10;
     ut_assert("Small destination case", utf8str_lowcase(str, buf, &sz) == UTF8_BUFFER_SMALL);
     sz = 10;
-    ut_assert("Empty dest case", utf8str_upcase(easy, NULL, &sz) == UTF8_OK && sz == 8);
+    ut_assert("Empty dest case", utf8str_upcase(easy, NULL, &sz) == UTF8_OK && sz == 2);
 
     return 0;
 }

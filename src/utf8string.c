@@ -171,7 +171,7 @@ static enum utf8_result process_utf8str(const char *src, char *dest, size_t *des
 
         lendst = cp_length(cpdst);
 
-        if (dest_sz != NULL) {
+        if (dest != NULL && dest_sz != NULL) {
             if (lendst + used >= *dest_sz) {
                 return UTF8_BUFFER_SMALL;
             }
@@ -189,7 +189,7 @@ static enum utf8_result process_utf8str(const char *src, char *dest, size_t *des
         *udst = '\0';
     }
     if (dest_sz) {
-        *dest_sz = *dest_sz - used;
+        *dest_sz = used;
     }
 
     return UTF8_OK;
@@ -432,7 +432,6 @@ size_t utf8str_width(const char *str, size_t len) {
         }
 
         width += utf8proc_charwidth(cp);
-
         ustr += sz;
         cnt++;
 
