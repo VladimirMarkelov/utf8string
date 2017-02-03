@@ -37,10 +37,9 @@ int utf8str_iscntrl(const char *str);
 int utf8str_isalpha(const char *str);
 int utf8str_isprint(const char *str);
 size_t utf8str_width(const char *str, size_t len);
+int utf8str_substr(const char *str, ssize_t start, ssize_t len, char *dest, size_t *dest_sz);
 
 /*
-utf8width - for the object, char, char*
-utf8width_first - first char of char*
 substring
 back - find the first byte of the symbol under pointer
 */

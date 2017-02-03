@@ -46,7 +46,7 @@ const char* test_utf_at() {
 
     ut_assert("NULL string at", utf8str_at_index(NULL, 2) == NULL);
     ut_assert("Short string at", utf8str_at_index(ascii, 10) == NULL);
-    ut_assert("Short string at [negative]", utf8str_at_index(ascii, -10) == NULL);
+    ut_assert("Short string at [negative]", utf8str_at_index(ascii, -10) == ascii);
     ut_assert("ASCII string at", utf8str_at_index(ascii, 5) != NULL && (*utf8str_at_index(ascii, 5) == 'l'));
     ut_assert("ASCII string at [negative]", utf8str_at_index(ascii, -3) != NULL && (*utf8str_at_index(ascii, -3) == 'p'));
     ut_assert("UTF string at", utf8str_at_index(utfstr, 2) != NULL && (*utf8str_at_index(utfstr, 2) == utfstr[4]));
@@ -152,6 +152,40 @@ const char* test_utf_width() {
     return 0;
 }
 
+const char* test_utf_substring() {
+    const char *ascii = "example";
+    const char *utf = "пример";
+    char buf[64];
+    size_t sz;
+
+    ut_assert("NULL substring", utf8str_substr(NULL, 1, 1, NULL, NULL) == UTF8_INVALID_ARG);
+    ut_assert("NULL buffer substring", utf8str_substr(ascii, 1, 1, NULL, NULL) == UTF8_OK);
+    sz = 64;
+    ut_assert("NULL buffer detect size substring", utf8str_substr(ascii, 1, 3, NULL, &sz) == UTF8_OK && sz == 3);
+    sz = 3;
+    ut_assert("NULL buffer small substring", utf8str_substr(ascii, 1, 3, buf, &sz) == UTF8_BUFFER_SMALL);
+    sz = 64;
+    ut_assert("ASCII substring - full", utf8str_substr(ascii, 1, 3, buf, &sz) == UTF8_OK && strcmp(buf, "xam") == 0 && sz == 3);
+    sz = 64;
+    int res = utf8str_substr(ascii, 2, 10, buf, &sz);
+    ut_assert("ASCII substring - short", res == UTF8_OK && strcmp(buf, "ample") == 0 && sz == 5);
+    sz = 64;
+    ut_assert("ASCII substring negative = short", utf8str_substr(ascii, -1, 3, buf, &sz) == UTF8_OK && strcmp(buf, "e") == 0 && sz == 1);
+    sz = 64;
+    ut_assert("ASCII substring negative = full", utf8str_substr(ascii, -4, 3, buf, &sz) == UTF8_OK && strcmp(buf, "mpl") == 0 && sz == 3);
+    sz = 64;
+    res = utf8str_substr(utf, 1, 3, buf, &sz);
+    ut_assert("UTF substring - full", res == UTF8_OK && strcmp(buf, "рим") == 0 && sz == 6);
+    sz = 64;
+    ut_assert("UTF substring - short", utf8str_substr(utf, 2, 10, buf, &sz) == UTF8_OK && strcmp(buf, "имер") == 0 && sz == 8);
+    sz = 64;
+    ut_assert("UTF substring negative = short", utf8str_substr(utf, -1, 3, buf, &sz) == UTF8_OK && strcmp(buf, "р") == 0 && sz == 2);
+    sz = 64;
+    ut_assert("UTF substring negative = full", utf8str_substr(utf, -4, 3, buf, &sz) == UTF8_OK && strcmp(buf, "име") == 0 && sz == 6);
+
+    return 0;
+}
+
 const char * run_all_test() {
     printf("=== Basic operations ===\n");
     ut_run_test("String Length", test_strlen);
@@ -162,6 +196,7 @@ const char * run_all_test() {
     ut_run_test("Starts and ends with", test_utf_starts);
     ut_run_test("Categories", test_utf_categories);
     ut_run_test("Width", test_utf_width);
+    ut_run_test("Substring", test_utf_substring);
     return 0;
 }
 

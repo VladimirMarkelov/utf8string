@@ -103,7 +103,7 @@ const char* utf8str_at_index(const char *str, ssize_t index) {
     if (index < 0) {
         size_t l = utf8str_count(str);
         if (l < -index) {
-            return NULL;
+            return str;
         }
 
         index = l + index;
@@ -441,4 +441,48 @@ size_t utf8str_width(const char *str, size_t len) {
     }
 
     return width;
+}
+
+int utf8str_substr(const char *str, ssize_t start, ssize_t len, char *dest, size_t *dest_sz) {
+    const char *begin = utf8str_at_index(str, start);
+    if (begin == NULL) {
+        return UTF8_INVALID_ARG;
+    }
+
+    size_t cnt = 0, sz, sz_used = 0;
+    utf8proc_uint8_t *ustr = (utf8proc_uint8_t*)begin;
+    utf8proc_uint8_t *udest = (utf8proc_uint8_t*)dest;
+    utf8proc_int32_t cp;
+
+    while (*ustr) {
+        if (cnt >= len && len >= 0) {
+            break;
+        }
+
+        sz = utf8proc_iterate(ustr, -1, &cp);
+        if (cp == -1) {
+            return UTF8_INVALID_UTF;
+        }
+
+        if (dest_sz != NULL && *dest_sz > 0 && *dest_sz <= sz_used + sz) {
+            return UTF8_BUFFER_SMALL;
+        }
+
+        ustr += sz;
+        sz_used += sz;
+        ++cnt;
+        if (udest != NULL) {
+            utf8proc_encode_char(cp, udest);
+            udest += sz;
+        }
+    }
+
+    if (udest != NULL) {
+        *udest = '\0';
+    }
+    if (dest_sz != NULL) {
+        *dest_sz = sz_used;
+    }
+
+    return UTF8_OK;
 }
