@@ -38,10 +38,13 @@ int utf8str_isalpha(const char *str);
 int utf8str_isprint(const char *str);
 size_t utf8str_width(const char *str, size_t len);
 int utf8str_substr(const char *str, ssize_t start, ssize_t len, char *dest, size_t *dest_sz);
+const char* utf8str_char_next(const char *str);
+const char* utf8str_char_back(const char *str);
+const char* utf8str_char_back_safe(const char *str, const char *stopper);
 
 /*
-substring
 back - find the first byte of the symbol under pointer
+next
 */
 
 /*

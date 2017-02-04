@@ -486,3 +486,51 @@ int utf8str_substr(const char *str, ssize_t start, ssize_t len, char *dest, size
 
     return UTF8_OK;
 }
+
+const char* utf8str_char_next(const char *str) {
+    if (str == NULL || *str == '\0') {
+        return str;
+    }
+
+    const char *new_str = str;
+    ++new_str;
+    while (*new_str) {
+        unsigned char c = *new_str;
+
+        if (c < 0x80) {
+            return new_str;
+        }
+        if (c > 0xC0) {
+            return new_str;
+        }
+
+        ++new_str;
+    }
+
+    return new_str;
+}
+
+const char* utf8str_char_back(const char *str) {
+    return utf8str_char_back_safe(str, NULL);
+}
+
+const char* utf8str_char_back_safe(const char *str, const char *stopper) {
+    if (str == NULL || *str == '\0' || (stopper != NULL && str == stopper)) {
+        return str;
+    }
+
+    const char *new_str = str;
+    --new_str;
+    if (stopper != NULL && stopper == str) {
+        return new_str;
+    }
+
+    while ((((unsigned char)*new_str) & 0xC0) == 0x80) {
+        --new_str;
+        if (stopper != NULL && stopper == str) {
+            return new_str;
+        }
+    }
+
+    return new_str;
+}

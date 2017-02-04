@@ -186,6 +186,44 @@ const char* test_utf_substring() {
     return 0;
 }
 
+const char* test_utf_moving() {
+    const char *ascii = "example";
+    const char *utf = "пример";
+
+    const char *p = utf8str_at_index(ascii, 2);
+    p = utf8str_char_next(p);
+    ut_assert("ASCII next", p != NULL && *p == 'm');
+    p = utf8str_at_index(ascii, 6);
+    const char *p2 = utf8str_char_next(p);
+    p = utf8str_at_index(ascii, 7);
+    ut_assert("Char next at end", p2 == p && *p == '\0');
+    p = utf8str_at_index(ascii, 2);
+    p = utf8str_char_back(p);
+    ut_assert("ASCII prev", p != NULL && *p == 'x');
+    p = utf8str_char_back_safe(p, ascii);
+    ut_assert("ASCII next prev safe", p != NULL && *p == 'e');
+    p = utf8str_char_back_safe(p, ascii);
+    ut_assert("ASCII next prev safe at beginning", p != NULL && p == ascii);
+
+    p = utf8str_at_index(utf, 2);
+    p2 = utf8str_at_index(utf, 3);
+    p = utf8str_char_next(p);
+    ut_assert("UTF next", p == p2);
+    ++p;
+    p = utf8str_char_next(p);
+    p2 = utf8str_char_next(p2);
+    ut_assert("UTF next from middle", p == p2);
+    p2 = utf8str_at_index(utf, 3);
+    p = utf8str_char_back(p);
+    ut_assert("UTF prev", p == p2);
+    p2 = utf8str_char_back(p2);
+    --p;
+    p = utf8str_char_back(p);
+    ut_assert("UTF prev from middle", p == p2);
+
+    return 0;
+}
+
 const char * run_all_test() {
     printf("=== Basic operations ===\n");
     ut_run_test("String Length", test_strlen);
@@ -197,6 +235,7 @@ const char * run_all_test() {
     ut_run_test("Categories", test_utf_categories);
     ut_run_test("Width", test_utf_width);
     ut_run_test("Substring", test_utf_substring);
+    ut_run_test("Char next and back", test_utf_moving);
     return 0;
 }
 
