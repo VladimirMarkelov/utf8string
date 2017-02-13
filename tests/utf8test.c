@@ -240,6 +240,25 @@ const char* test_utf_moving() {
     return 0;
 }
 
+const char* test_utf_reverse() {
+    char ascii[] = "example";
+    char utf[] = "пример";
+    char invstr[] = "exAmpLe\x89\xe6 пРимЕр";
+
+    int r = utf8str_reverse(NULL);
+    ut_assert("NULL string", r == UTF8_OK);
+    r = utf8str_reverse("");
+    ut_assert("Empty string", r == UTF8_OK);
+    r = utf8str_reverse(invstr);
+    ut_assert("Invalid string reverse", r == UTF8_INVALID_UTF && strcmp(invstr, "exAmpLe\x89\xe6 пРимЕр") == 0);
+    r = utf8str_reverse(ascii);
+    ut_assert("ASCII reverse", r == UTF8_OK && strcmp(ascii, "elpmaxe") == 0);
+    r = utf8str_reverse(utf);
+    ut_assert("UTF reverse", r == UTF8_OK && strcmp(utf, "ремирп") == 0);
+
+    return 0;
+}
+
 const char * run_all_test() {
     printf("=== Basic operations ===\n");
     ut_run_test("String Length", test_strlen);
@@ -253,6 +272,7 @@ const char * run_all_test() {
     ut_run_test("Width", test_utf_width);
     ut_run_test("Substring", test_utf_substring);
     ut_run_test("Char next and back", test_utf_moving);
+    ut_run_test("Reverse", test_utf_reverse);
     return 0;
 }
 

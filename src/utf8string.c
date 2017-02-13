@@ -196,7 +196,7 @@ static enum utf8_result process_utf8str(const char *src, char *dest, size_t *des
     return UTF8_OK;
 }
 
-static enum utf8_result process_utf8str_inplace(const char *src, utf8str_func fn, size_t count) {
+static enum utf8_result process_utf8str_inplace(char *src, utf8str_func fn, size_t count) {
     if (src == NULL) {
         return UTF8_INVALID_ARG;
     }
@@ -237,11 +237,11 @@ enum utf8_result utf8str_lowcase(const char *src, char *dest, size_t *dest_sz) {
     return process_utf8str(src, dest, dest_sz, utf8proc_tolower);
 }
 
-enum utf8_result utf8str_upcase_inplace(const char *src, size_t count) {
+enum utf8_result utf8str_upcase_inplace(char *src, size_t count) {
     return process_utf8str_inplace(src, utf8proc_toupper, count);
 }
 
-enum utf8_result utf8str_lowcase_inplace(const char *src, size_t count) {
+enum utf8_result utf8str_lowcase_inplace(char *src, size_t count) {
     return process_utf8str_inplace(src, utf8proc_tolower, count);
 }
 
@@ -558,7 +558,7 @@ const char* utf8str_char_back(const char *str) {
 }
 
 const char* utf8str_char_back_safe(const char *str, const char *stopper) {
-    if (str == NULL || *str == '\0' || (stopper != NULL && str == stopper)) {
+    if (str == NULL || (stopper != NULL && str == stopper)) {
         return str;
     }
 
@@ -576,4 +576,39 @@ const char* utf8str_char_back_safe(const char *str, const char *stopper) {
     }
 
     return new_str;
+}
+
+enum utf8_result utf8str_reverse(char *str) {
+    if (str == NULL || *str == '\0') {
+        return UTF8_OK;
+    }
+
+    size_t sz = strlen(str);
+    char *copy = (char *)malloc(sizeof(char) * (sz + 1));
+    if (copy == NULL) {
+        return UTF8_OUT_OF_MEMORY;
+    }
+
+    char *stopper = str;
+    size_t cnt;
+    utf8proc_uint8_t *ustr = (utf8proc_uint8_t*)copy;
+    utf8proc_int32_t cp;
+    char *dup = str + sz;
+
+    do {
+        dup = (char *)utf8str_char_back_safe(dup, stopper);
+        utf8proc_uint8_t *tmp = (utf8proc_uint8_t*)dup;
+        int len = utf8proc_iterate(tmp, -1, &cp);
+        if (cp == -1) {
+            free(copy);
+            return UTF8_INVALID_UTF;
+        }
+        utf8proc_encode_char(cp, ustr);
+        ustr += len;
+    } while (dup != stopper);
+    copy[sz] = '\0';
+
+    strcpy(str, copy);
+    free(copy);
+    return UTF8_OK;
 }

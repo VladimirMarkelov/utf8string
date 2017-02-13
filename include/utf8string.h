@@ -15,6 +15,7 @@ enum utf8_result {
     UTF8_UNFINISHED,
     UTF8_TOO_SHORT,
     UTF8_BUFFER_SMALL,
+    UTF8_OUT_OF_MEMORY,
 };
 
 /* Basic operations */
@@ -24,8 +25,8 @@ enum utf8_result utf8str_is_valid(const char *str, size_t len);
 const char* utf8str_at_index(const char *str, ssize_t index);
 enum utf8_result utf8str_upcase(const char *src, char *dest, size_t *dest_sz);
 enum utf8_result utf8str_lowcase(const char *src, char *dest, size_t *dest_sz);
-enum utf8_result utf8str_upcase_inplace(const char *src, size_t count);
-enum utf8_result utf8str_lowcase_inplace(const char *src, size_t count);
+enum utf8_result utf8str_upcase_inplace(char *src, size_t count);
+enum utf8_result utf8str_lowcase_inplace(char *src, size_t count);
 enum utf8_result utf8str_equal_no_case(const char *orig, const char *cmp);
 enum utf8_result utf8str_nequal_no_case(const char *orig, const char *cmp, size_t len);
 enum utf8_result utf8str_starts_with(const char *orig, const char *cmp);
@@ -44,13 +45,14 @@ const char* utf8str_char_next(const char *str);
 const char* utf8str_char_back(const char *str);
 const char* utf8str_char_back_safe(const char *str, const char *stopper);
 
+/* extra functions */
+enum utf8_result utf8str_reverse(char *str);
+
 /*
 2. Nice to have
 str_char_iterator
 str_word_iterator
 reverse
-upcase_first
-lowcase_first
 title_case
 split/split_next(?)
 scrub - replace invalid utf characters with placeholder
