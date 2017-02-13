@@ -382,6 +382,16 @@ int utf8str_isspace(const char *str) {
            (*str >= 0x09 && *str <= 0x0D);
 }
 
+static int utf8str_isspace_cp(utf8proc_int32_t cp) {
+    utf8proc_category_t ctg = utf8proc_category(cp);
+    if (ctg == -1) {
+        return 0;
+    }
+
+    return ctg == UTF8PROC_CATEGORY_ZS ||
+           (cp >= 0x09 && cp <= 0x0D);
+}
+
 int utf8str_ispunct(const char *str) {
     utf8proc_category_t ctg = utf8str_get_category(str);
     if (ctg == -1) {
@@ -610,5 +620,42 @@ enum utf8_result utf8str_reverse(char *str) {
 
     strcpy(str, copy);
     free(copy);
+    return UTF8_OK;
+}
+
+enum utf8_result utf8str_titlecase(char *str) {
+    if (str == NULL || *str == '\0') {
+        return UTF8_OK;
+    }
+
+    int space = 1;
+    utf8proc_uint8_t *usrc = (utf8proc_uint8_t*)str;
+    utf8proc_uint8_t *udst = (utf8proc_uint8_t*)str;
+    utf8proc_int32_t cpsrc, cpdst;
+    size_t len;
+
+    while (*usrc) {
+        len = utf8proc_iterate(usrc, -1, &cpsrc);
+
+        if (cpsrc == -1) {
+            return UTF8_INVALID_UTF;
+        }
+
+        cpdst = cpsrc;
+        if (utf8str_isspace_cp(cpsrc)) {
+            space = 1;
+        } else if (space) {
+            cpdst = utf8proc_toupper(cpsrc);
+            if (cp_length(cpdst) != len) {
+                return UTF8_BUFFER_SMALL;
+            }
+            space = 0;
+        }
+        utf8proc_encode_char(cpdst, udst);
+
+        usrc += len;
+        udst += len;
+    }
+
     return UTF8_OK;
 }

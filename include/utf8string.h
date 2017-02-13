@@ -47,13 +47,10 @@ const char* utf8str_char_back_safe(const char *str, const char *stopper);
 
 /* extra functions */
 enum utf8_result utf8str_reverse(char *str);
+enum utf8_result utf8str_titlecase(char *str);
 
 /*
 2. Nice to have
-str_char_iterator
-str_word_iterator
-reverse
-title_case
 split/split_next(?)
 scrub - replace invalid utf characters with placeholder
 translate - tr/abc/def/
@@ -62,6 +59,7 @@ repeat
 chomp - remove the suffix
 
 3. Maybe
+str_word_iterator
 justify - add spaces between words to make the string *width* if the string is longer than *limit*
 center - add spaces from start and to end until *width* is reached
 right_justify - add spaces to end until *width* is reached

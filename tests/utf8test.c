@@ -259,6 +259,25 @@ const char* test_utf_reverse() {
     return 0;
 }
 
+const char* test_utf_title_case() {
+    char ascii[] = "example Example example";
+    char utf[] = "пример Пример\x09пример";
+    char invstr[] = "exAmpLe тест\x89\xe6 пРимЕр";
+
+    int r = utf8str_titlecase(NULL);
+    ut_assert("NULL string", r == UTF8_OK);
+    r = utf8str_titlecase("");
+    ut_assert("Empty string", r == UTF8_OK);
+    r = utf8str_titlecase(invstr);
+    ut_assert("Invalid string title case", r == UTF8_INVALID_UTF && strcmp(invstr, "ExAmpLe Тест\x89\xe6 пРимЕр") == 0);
+    r = utf8str_titlecase(ascii);
+    ut_assert("ASCII title case", r == UTF8_OK && strcmp(ascii, "Example Example Example") == 0);
+    r = utf8str_titlecase(utf);
+    ut_assert("UTF title case", r == UTF8_OK && strcmp(utf, "Пример Пример\x09Пример") == 0);
+
+    return 0;
+}
+
 const char * run_all_test() {
     printf("=== Basic operations ===\n");
     ut_run_test("String Length", test_strlen);
@@ -273,6 +292,7 @@ const char * run_all_test() {
     ut_run_test("Substring", test_utf_substring);
     ut_run_test("Char next and back", test_utf_moving);
     ut_run_test("Reverse", test_utf_reverse);
+    ut_run_test("Title case", test_utf_title_case);
     return 0;
 }
 
