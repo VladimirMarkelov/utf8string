@@ -302,6 +302,32 @@ const char* test_utf_scrub() {
     return 0;
 }
 
+const char* test_utf_word_count() {
+    char ascii[] = "example Example  example";
+    char ascii_ex[] = "   example Example  example   ";
+    char utf[] = "пример\x0DПример\x0D \x09\x0Aпример";
+    char invstr[] = "exAmpLe тест\x89\xe6 пРимЕр";
+
+    int r = utf8str_word_count(NULL, NULL);
+    ut_assert("NULL string", r == 0);
+    r = utf8str_word_count("", NULL);
+    ut_assert("Empty string", r == 0);
+    r = utf8str_word_count(invstr, NULL);
+    ut_assert("Invalid word count - default", r == -1);
+    r = utf8str_word_count(ascii, NULL);
+    ut_assert("ASCII word count - default", r == 3);
+    r = utf8str_word_count(ascii, " ");
+    ut_assert("ASCII word count - spaces", r == 3);
+    r = utf8str_word_count(utf, NULL);
+    ut_assert("UTF word count - default", r == 3);
+    r = utf8str_word_count(utf, "\x0D\x0A");
+    ut_assert("UTF word count - line end", r == 4);
+    r = utf8str_word_count(ascii_ex, NULL);
+    ut_assert("ASCII word count - ext ascii", r == 3);
+
+    return 0;
+}
+
 const char * run_all_test() {
     printf("=== Basic operations ===\n");
     ut_run_test("String Length", test_strlen);
@@ -320,6 +346,7 @@ const char * run_all_test() {
     printf("=== Extra functions ===\n");
     ut_run_test("Title case", test_utf_title_case);
     ut_run_test("Scrub", test_utf_scrub);
+    ut_run_test("Word count", test_utf_word_count);
     return 0;
 }
 

@@ -49,17 +49,16 @@ const char* utf8str_char_back_safe(const char *str, const char *stopper);
 enum utf8_result utf8str_reverse(char *str);
 enum utf8_result utf8str_titlecase(char *str);
 enum utf8_result utf8str_scrub(char *str, char replace);
+int utf8str_word_count(const char *str, const char *sep);
 
 /*
 2. Nice to have
-split/split_next(?)
 translate - tr/abc/def/
-word_count
 repeat
 chomp - remove the suffix
 
 3. Maybe
-str_word_iterator
+word_iterator
 justify - add spaces between words to make the string *width* if the string is longer than *limit*
 center - add spaces from start and to end until *width* is reached
 right_justify - add spaces to end until *width* is reached
@@ -67,7 +66,7 @@ left_justify - add spaces from start until *width* is reached
 expand_tabs - convert tabs to spaces
 squeeze - remove duplicate spaces
 substr_count - number of occurances substr in string
- */
+*/
 
 #ifdef __cplusplus
 }

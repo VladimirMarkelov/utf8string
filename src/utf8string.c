@@ -699,3 +699,43 @@ enum utf8_result utf8str_scrub(char *str, char replace) {
 
     return UTF8_OK;
 }
+
+int utf8str_word_count(const char *str, const char *sep) {
+    if (str == NULL || *str == '\0') {
+        return 0;
+    }
+
+    int between = 1, cnt = 0;
+    utf8proc_uint8_t *ustr = (utf8proc_uint8_t*)str;
+    utf8proc_int32_t cp;
+    size_t len;
+
+    while (*ustr) {
+        len = utf8proc_iterate(ustr, -1, &cp);
+
+        if (cp == -1) {
+            return -1;
+        }
+
+        int issep = 0;
+        if (sep == NULL || *sep == '\0') {
+            issep = utf8str_isspace_cp(cp);
+        } else {
+            char srch[5] = {0};
+            utf8proc_encode_char(cp, srch);
+            issep = (strstr(sep, srch) != NULL);
+        }
+
+        if (issep) {
+            between = 1;
+        } else if (between) {
+            between = 0;
+            cnt++;
+        }
+
+        ustr += len;
+    }
+
+    return cnt;
+}
+
