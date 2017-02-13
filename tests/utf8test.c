@@ -278,6 +278,30 @@ const char* test_utf_title_case() {
     return 0;
 }
 
+const char* test_utf_scrub() {
+    char ascii[] = "example Example example";
+    char utf[] = "пример Пример\x09пример";
+    char invstr[] = "exAmpLe тест\x89\xe6 пРимЕр";
+    char invstr2[] = "exAmpLe тест\x89\xe6 пРимЕр";
+
+    int r = utf8str_scrub(NULL, ' ');
+    ut_assert("NULL string", r == UTF8_OK);
+    r = utf8str_scrub("", ' ');
+    ut_assert("Empty string", r == UTF8_OK);
+    r = utf8str_scrub(ascii, '\x89');
+    ut_assert("ASCII scrub - invalid replacemnt", r == UTF8_INVALID_ARG && strcmp(ascii, "example Example example") == 0);
+    r = utf8str_scrub(ascii, ' ');
+    ut_assert("ASCII scrub", r == UTF8_OK && strcmp(ascii, "example Example example") == 0);
+    r = utf8str_scrub(utf, ' ');
+    ut_assert("UTF scrub", r == UTF8_OK && strcmp(utf, "пример Пример\x09пример") == 0);
+    r = utf8str_scrub(invstr, ' ');
+    ut_assert("Invalid string scrub", r == UTF8_OK && strcmp(invstr, "exAmpLe тест   пРимЕр") == 0);
+    r = utf8str_scrub(invstr2, '\0');
+    ut_assert("Invalid string scrub compress", r == UTF8_OK && strcmp(invstr2, "exAmpLe тест пРимЕр") == 0);
+
+    return 0;
+}
+
 const char * run_all_test() {
     printf("=== Basic operations ===\n");
     ut_run_test("String Length", test_strlen);
@@ -292,7 +316,10 @@ const char * run_all_test() {
     ut_run_test("Substring", test_utf_substring);
     ut_run_test("Char next and back", test_utf_moving);
     ut_run_test("Reverse", test_utf_reverse);
+
+    printf("=== Extra functions ===\n");
     ut_run_test("Title case", test_utf_title_case);
+    ut_run_test("Scrub", test_utf_scrub);
     return 0;
 }
 

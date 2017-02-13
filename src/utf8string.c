@@ -659,3 +659,43 @@ enum utf8_result utf8str_titlecase(char *str) {
 
     return UTF8_OK;
 }
+
+enum utf8_result utf8str_scrub(char *str, char replace) {
+    if (replace & 0x80) {
+        return UTF8_INVALID_ARG;
+    }
+    if (str == NULL || *str == '\0') {
+        return UTF8_OK;
+    }
+
+    utf8proc_uint8_t *usrc = (utf8proc_uint8_t*)str;
+    utf8proc_uint8_t *udst = (utf8proc_uint8_t*)str;
+    utf8proc_int32_t cp;
+    size_t len;
+
+    while (*usrc) {
+        len = utf8proc_iterate(usrc, -1, &cp);
+
+        if (cp == -1) {
+            if (replace != '\0') {
+                *udst = replace;
+                udst++;
+            }
+
+            usrc++;
+            continue;
+        }
+
+        if (usrc != udst) {
+            utf8proc_encode_char(cp, udst);
+        }
+
+        usrc += len;
+        udst += len;
+    }
+    if (usrc != udst) {
+        *udst = '\0';
+    }
+
+    return UTF8_OK;
+}

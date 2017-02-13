@@ -48,11 +48,11 @@ const char* utf8str_char_back_safe(const char *str, const char *stopper);
 /* extra functions */
 enum utf8_result utf8str_reverse(char *str);
 enum utf8_result utf8str_titlecase(char *str);
+enum utf8_result utf8str_scrub(char *str, char replace);
 
 /*
 2. Nice to have
 split/split_next(?)
-scrub - replace invalid utf characters with placeholder
 translate - tr/abc/def/
 word_count
 repeat
