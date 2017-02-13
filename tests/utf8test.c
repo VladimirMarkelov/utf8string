@@ -80,6 +80,22 @@ const char* test_utf_cases() {
     return 0;
 }
 
+const char* test_utf_cases_inplace() {
+    char *str = "exAmpLe пРимЕр";
+    char buf[48];
+
+    ut_assert("NULL string case", utf8str_upcase_inplace(NULL, 0) == UTF8_INVALID_ARG);
+    strcpy(buf, str);
+    int r = utf8str_upcase_inplace(buf, 0);
+    ut_assert("No size case", r == UTF8_OK && strcmp(buf, "EXAMPLE ПРИМЕР") == 0);
+    strcpy(buf, str);
+    r = utf8str_upcase_inplace(buf, 4);
+    printf("result: %s\n", buf);
+    ut_assert("Only 4 first", r == UTF8_OK && strcmp(buf, "EXAMpLe пРимЕр") == 0);
+
+    return 0;
+}
+
 const char* test_utf_iequal() {
     ut_assert("NULL strings equal", utf8str_equal_no_case(NULL, NULL) == UTF8_EQUAL);
     ut_assert("NULL string and non-NULL equal 1", utf8str_equal_no_case("a", NULL) == UTF8_NEQUAL);
@@ -230,6 +246,7 @@ const char * run_all_test() {
     ut_run_test("Valid UTF", test_utf_valid);
     ut_run_test("Char at", test_utf_at);
     ut_run_test("Lowcase and Upcase", test_utf_cases);
+    ut_run_test("Lowcase and Upcase inplace", test_utf_cases_inplace);
     ut_run_test("Compare no case", test_utf_iequal);
     ut_run_test("Starts and ends with", test_utf_starts);
     ut_run_test("Categories", test_utf_categories);

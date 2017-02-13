@@ -24,6 +24,8 @@ enum utf8_result utf8str_is_valid(const char *str, size_t len);
 const char* utf8str_at_index(const char *str, ssize_t index);
 enum utf8_result utf8str_upcase(const char *src, char *dest, size_t *dest_sz);
 enum utf8_result utf8str_lowcase(const char *src, char *dest, size_t *dest_sz);
+enum utf8_result utf8str_upcase_inplace(const char *src, size_t count);
+enum utf8_result utf8str_lowcase_inplace(const char *src, size_t count);
 enum utf8_result utf8str_equal_no_case(const char *orig, const char *cmp);
 enum utf8_result utf8str_nequal_no_case(const char *orig, const char *cmp, size_t len);
 enum utf8_result utf8str_starts_with(const char *orig, const char *cmp);
@@ -43,11 +45,6 @@ const char* utf8str_char_back(const char *str);
 const char* utf8str_char_back_safe(const char *str, const char *stopper);
 
 /*
-back - find the first byte of the symbol under pointer
-next
-*/
-
-/*
 2. Nice to have
 str_char_iterator
 str_word_iterator
@@ -59,7 +56,6 @@ split/split_next(?)
 scrub - replace invalid utf characters with placeholder
 translate - tr/abc/def/
 word_count
-str_srch_right
 repeat
 chomp - remove the suffix
 

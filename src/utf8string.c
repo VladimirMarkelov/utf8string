@@ -149,6 +149,7 @@ static size_t cp_length(utf8proc_uint32_t cp) {
         return 0;
     }
 }
+
 static enum utf8_result process_utf8str(const char *src, char *dest, size_t *dest_sz, utf8str_func fn) {
     if (src == NULL) {
         return UTF8_INVALID_ARG;
@@ -195,6 +196,39 @@ static enum utf8_result process_utf8str(const char *src, char *dest, size_t *des
     return UTF8_OK;
 }
 
+static enum utf8_result process_utf8str_inplace(const char *src, utf8str_func fn, size_t count) {
+    if (src == NULL) {
+        return UTF8_INVALID_ARG;
+    }
+
+    size_t len = 0, used = 0, lendst, processed = 0;
+    utf8proc_uint8_t *usrc = (utf8proc_uint8_t*)src;
+    utf8proc_uint8_t *udst = (utf8proc_uint8_t*)src;
+    utf8proc_int32_t cpsrc, cpdst;
+
+    while (*usrc && (count == 0 || processed < count)) {
+        len = utf8proc_iterate(usrc, -1, &cpsrc);
+
+        if (cpsrc == -1) {
+            return UTF8_INVALID_UTF;
+        }
+
+        cpdst = (*fn)(cpsrc);
+        usrc += len;
+
+        lendst = cp_length(cpdst);
+        if (lendst > len) {
+            return UTF8_BUFFER_SMALL;
+        }
+
+        lendst = utf8proc_encode_char(cpdst, udst);
+        udst += lendst;
+        ++processed;
+    }
+
+    return UTF8_OK;
+}
+
 enum utf8_result utf8str_upcase(const char *src, char *dest, size_t *dest_sz) {
     return process_utf8str(src, dest, dest_sz, utf8proc_toupper);
 }
@@ -202,6 +236,15 @@ enum utf8_result utf8str_upcase(const char *src, char *dest, size_t *dest_sz) {
 enum utf8_result utf8str_lowcase(const char *src, char *dest, size_t *dest_sz) {
     return process_utf8str(src, dest, dest_sz, utf8proc_tolower);
 }
+
+enum utf8_result utf8str_upcase_inplace(const char *src, size_t count) {
+    return process_utf8str_inplace(src, utf8proc_toupper, count);
+}
+
+enum utf8_result utf8str_lowcase_inplace(const char *src, size_t count) {
+    return process_utf8str_inplace(src, utf8proc_tolower, count);
+}
+
 
 enum utf8_result utf8str_equal_no_case(const char *orig, const char *cmp) {
     return utf8str_nequal_no_case(orig, cmp, 0);
@@ -521,7 +564,7 @@ const char* utf8str_char_back_safe(const char *str, const char *stopper) {
 
     const char *new_str = str;
     --new_str;
-    if (stopper != NULL && stopper == str) {
+    if (stopper != NULL && stopper == new_str) {
         return new_str;
     }
 
