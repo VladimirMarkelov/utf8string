@@ -357,6 +357,31 @@ const char* test_utf_translate() {
     return 0;
 }
 
+const char* test_utf_tab_replace() {
+    char text[] = "пример\x09 example \x09пример";
+    char dst[64] = "";
+    size_t sz;
+
+    int r = utf8str_expand_tabs(NULL, dst, &sz, 4);
+    ut_assert("NULL string", r == UTF8_OK && *dst == '\0' && sz == 0);
+    sz = 0;
+    r = utf8str_expand_tabs("a\x09", NULL, &sz, 4);
+    ut_assert("Calculate", r == UTF8_OK && sz == 5);
+    r = utf8str_expand_tabs("a\x09", NULL, NULL, 4);
+    ut_assert("No dest", r == UTF8_INVALID_ARG);
+    r = utf8str_expand_tabs("a\x09", dst, NULL, 0);
+    ut_assert("Invalid tab size", r == UTF8_INVALID_ARG);
+    sz = 5;
+    r = utf8str_expand_tabs("a\x09", dst, &sz, 4);
+    ut_assert("Small buffer", r == UTF8_BUFFER_SMALL);
+    sz = 64;
+    size_t orig = strlen(text);
+    r = utf8str_expand_tabs(text, dst, &sz, 4);
+    ut_assert("Expand normal", r == UTF8_OK && sz == orig+2*4-2 && strcmp(dst, "пример     example     пример") == 0);
+
+    return 0;
+}
+
 const char * run_all_test() {
     printf("=== Basic operations ===\n");
     ut_run_test("String Length", test_strlen);
@@ -377,6 +402,7 @@ const char * run_all_test() {
     ut_run_test("Scrub", test_utf_scrub);
     ut_run_test("Word count", test_utf_word_count);
     ut_run_test("Translate", test_utf_translate);
+    ut_run_test("Replace tabs", test_utf_tab_replace);
     return 0;
 }
 

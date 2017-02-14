@@ -739,7 +739,7 @@ int utf8str_word_count(const char *str, const char *sep) {
     return cnt;
 }
 
-enum utf8_result utf8str_translate(char *src, char *dst, size_t dst_sz, const char *what, const char *with) {
+enum utf8_result utf8str_translate(const char *src, char *dst, size_t dst_sz, const char *what, const char *with) {
     if (what == NULL || (dst == NULL && dst_sz == 0)) {
         return UTF8_INVALID_ARG;
     }
@@ -852,3 +852,70 @@ enum utf8_result utf8str_translate(char *src, char *dst, size_t dst_sz, const ch
     free(witharr);
     return UTF8_OK;
 }
+
+enum utf8_result utf8str_expand_tabs(const char *src, char *dst, size_t *dst_sz, size_t tab_sz) {
+    if (tab_sz == 0 || tab_sz > 128) {
+        return UTF8_INVALID_ARG;
+    }
+    if (dst == NULL && dst_sz == NULL) {
+        return UTF8_INVALID_ARG;
+    }
+    if (src == NULL || *src == '\0') {
+        if (dst != NULL) {
+            *dst = '\0';
+        }
+        if (dst_sz != NULL) {
+            *dst_sz = 0;
+        }
+        return UTF8_OK;
+    }
+
+    utf8proc_uint8_t *usrc = (utf8proc_uint8_t*)src;
+    utf8proc_uint8_t *udst = (utf8proc_uint8_t*)dst;
+    utf8proc_int32_t cp;
+    size_t len;
+    size_t used = 0;
+
+    while (*usrc) {
+        len = utf8proc_iterate(usrc, -1, &cp);
+
+        if (cp == -1) {
+            return UTF8_INVALID_UTF;
+        }
+
+        if (cp == 0x09) {
+            for (int i = 0; i < tab_sz; ++i) {
+                if (dst_sz != NULL && *dst_sz != 0 && *dst_sz <= used + 1) {
+                    return UTF8_BUFFER_SMALL;
+                }
+
+                if (udst != NULL) {
+                    *udst = ' ';
+                    ++udst;
+                }
+
+                ++used;
+            }
+        } else {
+            if (dst_sz != NULL && *dst_sz != 0 && *dst_sz <= used + len) {
+                return UTF8_BUFFER_SMALL;
+            }
+
+            if (udst != NULL) {
+                utf8proc_encode_char(cp, udst);
+                udst += len;
+            }
+
+            used += len;
+        }
+
+        usrc += len;
+    }
+
+    if (dst_sz != NULL) {
+        *dst_sz = used;
+    }
+
+    return UTF8_OK;
+}
+

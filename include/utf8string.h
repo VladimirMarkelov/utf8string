@@ -50,21 +50,17 @@ enum utf8_result utf8str_reverse(char *str);
 enum utf8_result utf8str_titlecase(char *str);
 enum utf8_result utf8str_scrub(char *str, char replace);
 int utf8str_word_count(const char *str, const char *sep);
-enum utf8_result utf8str_translate(char *src, char *dst, size_t dst_sz, const char *what, const char *with);
+enum utf8_result utf8str_translate(const char *src, char *dst, size_t dst_sz, const char *what, const char *with);
+enum utf8_result utf8str_expand_tabs(const char *str, char *dst, size_t *dst_sz, size_t tab_sz);
 
 /*
-2. Nice to have
-translate - tr/abc/def/
-
 3. Maybe
-word_iterator
 justify - add spaces between words to make the string *width* if the string is longer than *limit*
 center - add spaces from start and to end until *width* is reached
 right_justify - add spaces to end until *width* is reached
 left_justify - add spaces from start until *width* is reached
-expand_tabs - convert tabs to spaces
 squeeze - remove duplicate spaces
-substr_count - number of occurances substr in string
+word_iterator
 */
 
 #ifdef __cplusplus
