@@ -926,5 +926,58 @@ enum utf8_result utf8str_squeeze(char *str, const char *what) {
     if (str == NULL || *str == '\0') {
         return UTF8_OK;
     }
+
+    utf8proc_uint8_t *ustr = (utf8proc_uint8_t*)str;
+    utf8proc_uint8_t *udst = (utf8proc_uint8_t*)str;
+    utf8proc_int32_t cp, prevcp = 0;
+    size_t len;
+
+    while (*ustr) {
+        len = utf8proc_iterate(ustr, -1, &cp);
+
+        if (cp == -1) {
+            return UTF8_INVALID_UTF;
+        }
+
+        if (prevcp == 0 || prevcp != cp) {
+            prevcp = cp;
+            if (ustr != udst) {
+                utf8proc_encode_char(cp, udst);
+            }
+            ustr += len;
+            udst += len;
+            continue;
+        }
+
+        if (what == NULL || *what == '\0') {
+            if (prevcp == cp) {
+                ustr += len;
+            } else {
+                if (ustr != udst) {
+                    utf8proc_encode_char(cp, udst);
+                }
+
+                prevcp = cp;
+                ustr += len;
+                udst += len;
+            }
+        } else {
+            char cstr[5] = {0};
+            utf8proc_encode_char(cp, cstr);
+            if (prevcp == cp && strstr(what, cstr) != NULL) {
+                ustr += len;
+            } else {
+                if (ustr != udst) {
+                    utf8proc_encode_char(cp, udst);
+                }
+
+                prevcp = cp;
+                ustr += len;
+                udst += len;
+            }
+        }
+    }
+
+    return UTF8_OK;
 }
 
