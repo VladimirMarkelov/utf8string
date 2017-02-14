@@ -739,8 +739,8 @@ int utf8str_word_count(const char *str, const char *sep) {
     return cnt;
 }
 
-enum utf8_result utf8str_translate(const char *src, char *dst, size_t dst_sz, const char *what, const char *with) {
-    if (what == NULL || (dst == NULL && dst_sz == 0)) {
+enum utf8_result utf8str_translate(const char *src, char *dst, size_t *dst_sz, const char *what, const char *with) {
+    if (what == NULL || (dst == NULL && dst_sz == NULL)) {
         return UTF8_INVALID_ARG;
     }
     if (src == NULL || *src == '\0') {
@@ -826,7 +826,7 @@ enum utf8_result utf8str_translate(const char *src, char *dst, size_t dst_sz, co
             }
         }
 
-        if (dcp != 0 && dst_sz != 0 && used + cp_length(dcp) >= dst_sz) {
+        if (dcp != 0 && dst_sz != NULL && *dst_sz != 0 && used + cp_length(dcp) >= *dst_sz) {
             free(whatarr);
             free(witharr);
             if (udst) {
@@ -846,6 +846,9 @@ enum utf8_result utf8str_translate(const char *src, char *dst, size_t dst_sz, co
 
     if (udst != NULL) {
         *udst = '\0';
+    }
+    if (dst_sz != NULL) {
+        *dst_sz = used;
     }
 
     free(whatarr);
@@ -917,5 +920,11 @@ enum utf8_result utf8str_expand_tabs(const char *src, char *dst, size_t *dst_sz,
     }
 
     return UTF8_OK;
+}
+
+enum utf8_result utf8str_squeeze(char *str, const char *what) {
+    if (str == NULL || *str == '\0') {
+        return UTF8_OK;
+    }
 }
 

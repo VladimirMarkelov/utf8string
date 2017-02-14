@@ -50,8 +50,9 @@ enum utf8_result utf8str_reverse(char *str);
 enum utf8_result utf8str_titlecase(char *str);
 enum utf8_result utf8str_scrub(char *str, char replace);
 int utf8str_word_count(const char *str, const char *sep);
-enum utf8_result utf8str_translate(const char *src, char *dst, size_t dst_sz, const char *what, const char *with);
+enum utf8_result utf8str_translate(const char *src, char *dst, size_t *dst_sz, const char *what, const char *with);
 enum utf8_result utf8str_expand_tabs(const char *str, char *dst, size_t *dst_sz, size_t tab_sz);
+enum utf8_result utf8str_squeeze(char *str, const char *what);
 
 /*
 3. Maybe

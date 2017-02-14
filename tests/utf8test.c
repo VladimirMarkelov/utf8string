@@ -331,27 +331,33 @@ const char* test_utf_word_count() {
 const char* test_utf_translate() {
     char text[] = "пример\x0D example\x0D \x09\x0Aпример";
     char dst[64] = "tst";
+    size_t sz = 64;
 
-    int r = utf8str_translate(NULL, dst, 10, "a", "b");
+    int r = utf8str_translate(NULL, dst, NULL, "a", "b");
     ut_assert("NULL string", r == UTF8_OK && *dst == '\0');
-    r = utf8str_translate(text, NULL, 0, "a", "b");
+    r = utf8str_translate(text, NULL, NULL, "a", "b");
     ut_assert("NULL dest", r == UTF8_INVALID_ARG);
-    r = utf8str_translate(text, NULL, 0, "\x89", "b");
+    r = utf8str_translate(text, NULL, &sz, "\x89", "b");
     ut_assert("Invalid what", r == UTF8_INVALID_ARG);
-    r = utf8str_translate(text, NULL, 0, "e", "\x95");
+    r = utf8str_translate(text, NULL, &sz, "e", "\x95");
     ut_assert("Invalid with", r == UTF8_INVALID_ARG);
-    r = utf8str_translate("abcd\x89gef", dst, 0, "b", "f");
+    r = utf8str_translate("abcd\x89gef", dst, &sz, "b", "f");
     ut_assert("Invalid source UTF", r == UTF8_INVALID_UTF);
 
-    r = utf8str_translate(text, dst, 0, "e", "b");
+    r = utf8str_translate(text, dst, NULL, "e", "b");
     ut_assert("No dest size", r == UTF8_OK && strcmp(dst, "пример\x0D bxamplb\x0D \x09\x0Aпример") == 0);
-    r = utf8str_translate(text, dst, 10, "a", "b");
+    sz = 0;
+    r = utf8str_translate(text, dst, &sz, "e", "b");
+    ut_assert("Calculate size", r == UTF8_OK && sz == 37);
+    sz = 10;
+    r = utf8str_translate(text, dst, &sz, "a", "b");
     ut_assert("Dest small", r == UTF8_BUFFER_SMALL && strcmp(dst, "прим") == 0);
-    r = utf8str_translate(text, dst, 64, "\x0D\x0A", "");
+    sz = 64;
+    r = utf8str_translate(text, dst, &sz, "\x0D\x0A", "");
     ut_assert("Remove end-of-lines", r == UTF8_OK && strcmp(dst, "пример example \x09пример") == 0);
-    r = utf8str_translate(text, dst, 64, "x", "á");
+    r = utf8str_translate(text, dst, NULL, "x", "á");
     ut_assert("Bigger replace", r == UTF8_OK && strcmp(dst, "пример\x0D eáample\x0D \x09\x0Aпример") == 0);
-    r = utf8str_translate(text, dst, 64, "и", "I");
+    r = utf8str_translate(text, dst, NULL, "и", "I");
     ut_assert("Smaller replace", r == UTF8_OK && strcmp(dst, "прIмер\x0D example\x0D \x09\x0AпрIмер") == 0);
 
     return 0;
