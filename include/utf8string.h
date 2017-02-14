@@ -50,12 +50,11 @@ enum utf8_result utf8str_reverse(char *str);
 enum utf8_result utf8str_titlecase(char *str);
 enum utf8_result utf8str_scrub(char *str, char replace);
 int utf8str_word_count(const char *str, const char *sep);
+enum utf8_result utf8str_translate(char *src, char *dst, size_t dst_sz, const char *what, const char *with);
 
 /*
 2. Nice to have
 translate - tr/abc/def/
-repeat
-chomp - remove the suffix
 
 3. Maybe
 word_iterator

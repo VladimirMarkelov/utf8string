@@ -328,6 +328,35 @@ const char* test_utf_word_count() {
     return 0;
 }
 
+const char* test_utf_translate() {
+    char text[] = "пример\x0D example\x0D \x09\x0Aпример";
+    char dst[64] = "tst";
+
+    int r = utf8str_translate(NULL, dst, 10, "a", "b");
+    ut_assert("NULL string", r == UTF8_OK && *dst == '\0');
+    r = utf8str_translate(text, NULL, 0, "a", "b");
+    ut_assert("NULL dest", r == UTF8_INVALID_ARG);
+    r = utf8str_translate(text, NULL, 0, "\x89", "b");
+    ut_assert("Invalid what", r == UTF8_INVALID_ARG);
+    r = utf8str_translate(text, NULL, 0, "e", "\x95");
+    ut_assert("Invalid with", r == UTF8_INVALID_ARG);
+    r = utf8str_translate("abcd\x89gef", dst, 0, "b", "f");
+    ut_assert("Invalid source UTF", r == UTF8_INVALID_UTF);
+
+    r = utf8str_translate(text, dst, 0, "e", "b");
+    ut_assert("No dest size", r == UTF8_OK && strcmp(dst, "пример\x0D bxamplb\x0D \x09\x0Aпример") == 0);
+    r = utf8str_translate(text, dst, 10, "a", "b");
+    ut_assert("Dest small", r == UTF8_BUFFER_SMALL && strcmp(dst, "прим") == 0);
+    r = utf8str_translate(text, dst, 64, "\x0D\x0A", "");
+    ut_assert("Remove end-of-lines", r == UTF8_OK && strcmp(dst, "пример example \x09пример") == 0);
+    r = utf8str_translate(text, dst, 64, "x", "á");
+    ut_assert("Bigger replace", r == UTF8_OK && strcmp(dst, "пример\x0D eáample\x0D \x09\x0Aпример") == 0);
+    r = utf8str_translate(text, dst, 64, "и", "I");
+    ut_assert("Smaller replace", r == UTF8_OK && strcmp(dst, "прIмер\x0D example\x0D \x09\x0AпрIмер") == 0);
+
+    return 0;
+}
+
 const char * run_all_test() {
     printf("=== Basic operations ===\n");
     ut_run_test("String Length", test_strlen);
@@ -347,6 +376,7 @@ const char * run_all_test() {
     ut_run_test("Title case", test_utf_title_case);
     ut_run_test("Scrub", test_utf_scrub);
     ut_run_test("Word count", test_utf_word_count);
+    ut_run_test("Translate", test_utf_translate);
     return 0;
 }
 

@@ -739,3 +739,116 @@ int utf8str_word_count(const char *str, const char *sep) {
     return cnt;
 }
 
+enum utf8_result utf8str_translate(char *src, char *dst, size_t dst_sz, const char *what, const char *with) {
+    if (what == NULL || (dst == NULL && dst_sz == 0)) {
+        return UTF8_INVALID_ARG;
+    }
+    if (src == NULL || *src == '\0') {
+        if (dst) {
+            *dst = '\0';
+        }
+        return UTF8_OK;
+    }
+
+    size_t whatlen = utf8str_count(what);
+    if (whatlen == (size_t)-1) {
+        return UTF8_INVALID_ARG;
+    }
+    size_t withlen = utf8str_count(with);
+    if (withlen == (size_t)-1) {
+        return UTF8_INVALID_ARG;
+    }
+
+    utf8proc_int32_t *whatarr = (utf8proc_int32_t *)malloc(sizeof(utf8proc_int32_t) * whatlen);
+    if (whatarr == NULL) {
+        return UTF8_OUT_OF_MEMORY;
+    }
+    utf8proc_int32_t *witharr = (utf8proc_int32_t *)malloc(sizeof(utf8proc_int32_t) * whatlen);
+    if (witharr == NULL) {
+        free(whatarr);
+        return UTF8_OUT_OF_MEMORY;
+    }
+
+    utf8proc_uint8_t *utmp = (utf8proc_uint8_t*)what;
+    utf8proc_int32_t cp, dcp;
+    size_t idx = 0, len, dlen;
+
+    for (idx = 0; idx < whatlen; ++idx) {
+        len = utf8proc_iterate(utmp, -1, &cp);
+
+        if (cp == -1) {
+            free(whatarr);
+            free(witharr);
+            return UTF8_INVALID_UTF;
+        }
+
+        whatarr[idx] = cp;
+        utmp += len;
+    }
+
+    utmp = (utf8proc_uint8_t*)with;
+    for (idx = 0; idx < whatlen; ++idx) {
+        if (*utmp == '\0') {
+            witharr[idx] = 0;
+            continue;
+        }
+
+        len = utf8proc_iterate(utmp, -1, &cp);
+
+        if (cp == -1) {
+            free(whatarr);
+            free(witharr);
+            return UTF8_INVALID_UTF;
+        }
+
+        witharr[idx] = cp;
+        utmp += len;
+    }
+
+    size_t used = 0;
+    utf8proc_uint8_t *usrc = (utf8proc_uint8_t*)src;
+    utf8proc_uint8_t *udst = (utf8proc_uint8_t*)dst;
+
+    while (*usrc) {
+        len = utf8proc_iterate(usrc, -1, &cp);
+
+        if (cp == -1) {
+            free(whatarr);
+            free(witharr);
+            return UTF8_INVALID_UTF;
+        }
+
+        dcp = cp;
+        for (size_t i = 0; i < whatlen; ++i) {
+            if (whatarr[i] == cp) {
+                dcp = witharr[i];
+                break;
+            }
+        }
+
+        if (dcp != 0 && dst_sz != 0 && used + cp_length(dcp) >= dst_sz) {
+            free(whatarr);
+            free(witharr);
+            if (udst) {
+                *udst = '\0';
+            }
+            return UTF8_BUFFER_SMALL;
+        }
+
+        if (udst != NULL && dcp != 0) {
+            dlen = utf8proc_encode_char(dcp, udst);
+            udst += dlen;
+        }
+
+        used += cp_length(dcp);
+        usrc += len;
+    }
+
+    if (udst != NULL) {
+        *udst = '\0';
+    }
+
+    free(whatarr);
+    free(witharr);
+    return UTF8_OK;
+}
