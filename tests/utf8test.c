@@ -388,6 +388,26 @@ const char* test_utf_tab_replace() {
     return 0;
 }
 
+const char* test_utf_squeeze() {
+    char ascii[] = "exxample  exammmmmpppple==";
+    char ascii2[] = "exxample  exammmmmpppple==";
+    char utf[] = "  приммерр \x09 exaample  примеееерррр";
+    char utf2[] = "  приммерр \x09 exaample  примеееерррр";
+
+    int r = utf8str_squeeze(NULL, NULL);
+    ut_assert("NULL string", r == UTF8_OK);
+    r = utf8str_squeeze(ascii, NULL);
+    ut_assert("NULL char list", r == UTF8_OK && strcmp(ascii, "example example=") == 0);
+    r = utf8str_squeeze(ascii2, "xp");
+    ut_assert("XP in char list", r == UTF8_OK && strcmp(ascii2, "example  exammmmmple==") == 0);
+    r = utf8str_squeeze(utf, NULL);
+    ut_assert("UTF NULL char list", r == UTF8_OK && strcmp(utf, " пример \x09 example пример") == 0);
+    r = utf8str_squeeze(utf2, "рa");
+    ut_assert("UTF UTF&NON-UTF in char list", r == UTF8_OK && strcmp(utf2, "  приммер \x09 example  примеееер") == 0);
+
+    return 0;
+}
+
 const char * run_all_test() {
     printf("=== Basic operations ===\n");
     ut_run_test("String Length", test_strlen);
@@ -409,6 +429,7 @@ const char * run_all_test() {
     ut_run_test("Word count", test_utf_word_count);
     ut_run_test("Translate", test_utf_translate);
     ut_run_test("Replace tabs", test_utf_tab_replace);
+    ut_run_test("Sqeeze", test_utf_squeeze);
     return 0;
 }
 

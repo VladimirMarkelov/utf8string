@@ -978,6 +978,10 @@ enum utf8_result utf8str_squeeze(char *str, const char *what) {
         }
     }
 
+    if (udst != ustr) {
+        *udst = '\0';
+    }
+
     return UTF8_OK;
 }
 
