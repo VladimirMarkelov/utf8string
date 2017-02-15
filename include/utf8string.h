@@ -53,6 +53,9 @@ int utf8str_word_count(const char *str, const char *sep);
 enum utf8_result utf8str_translate(const char *src, char *dst, size_t *dst_sz, const char *what, const char *with);
 enum utf8_result utf8str_expand_tabs(const char *str, char *dst, size_t *dst_sz, size_t tab_sz);
 enum utf8_result utf8str_squeeze(char *str, const char *what);
+enum utf8_result utf8str_strip(char *str, const char *what);
+enum utf8_result utf8str_rstrip(char *str, const char *what);
+enum utf8_result utf8str_lstrip(char *str, const char *what);
 
 /*
 3. Maybe
@@ -60,7 +63,6 @@ justify - add spaces between words to make the string *width* if the string is l
 center - add spaces from start and to end until *width* is reached
 right_justify - add spaces to end until *width* is reached
 left_justify - add spaces from start until *width* is reached
-squeeze - remove duplicate spaces
 word_iterator
 */
 

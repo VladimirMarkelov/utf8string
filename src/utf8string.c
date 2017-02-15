@@ -985,3 +985,105 @@ enum utf8_result utf8str_squeeze(char *str, const char *what) {
     return UTF8_OK;
 }
 
+enum utf8_result utf8str_strip(char *str, const char *what) {
+    enum utf8_result res = utf8str_rstrip(str, what);
+    if (res == UTF8_OK) {
+        res = utf8str_lstrip(str, what);
+    }
+
+    return res;
+}
+
+enum utf8_result utf8str_rstrip(char *str, const char *what) {
+    if (str == NULL || *str == '\0') {
+        return UTF8_OK;
+    }
+
+    const char *lineend = &str[strlen(str)];
+    utf8proc_uint8_t *stopper = (utf8proc_uint8_t*)str;
+
+    utf8proc_uint8_t *ustr = (utf8proc_uint8_t*)utf8str_char_back(lineend);
+    utf8proc_int32_t cp;
+    size_t len;
+    char cstr[5];
+
+    while (ustr != stopper) {
+        len = utf8proc_iterate(ustr, -1, &cp);
+
+        if (cp == -1) {
+            return UTF8_INVALID_UTF;
+        }
+
+        int remove = 0;
+        if (what == NULL || *what == '\0') {
+            remove = utf8str_isspace_cp(cp);
+        } else {
+            utf8proc_encode_char(cp, cstr);
+            cstr[len] = '\0';
+            remove = strstr(what, cstr) != NULL;
+        }
+
+        if (! remove) {
+            break;
+        }
+
+        *ustr = '\0';
+        ustr = (char *)utf8str_char_back(ustr);
+    }
+
+    return UTF8_OK;
+}
+
+enum utf8_result utf8str_lstrip(char *str, const char *what) {
+    if (str == NULL || *str == '\0') {
+        return UTF8_OK;
+    }
+
+    utf8proc_uint8_t *ustr = (utf8proc_uint8_t*)str;
+    utf8proc_uint8_t *udst = (utf8proc_uint8_t*)str;
+    utf8proc_int32_t cp;
+    size_t len;
+    char cstr[5];
+
+    while (*ustr) {
+        len = utf8proc_iterate(ustr, -1, &cp);
+
+        if (cp == -1) {
+            return UTF8_INVALID_UTF;
+        }
+
+        int remove = 0;
+        if (what == NULL || *what == '\0') {
+            remove = utf8str_isspace_cp(cp);
+        } else {
+            utf8proc_encode_char(cp, cstr);
+            cstr[len] = '\0';
+            remove = strstr(what, cstr) != NULL;
+        }
+
+        if (! remove) {
+            break;
+        }
+
+        ustr += len;
+    }
+
+    if (ustr != udst) {
+        while (*ustr) {
+            len = utf8proc_iterate(ustr, -1, &cp);
+
+            if (cp == -1) {
+                return UTF8_INVALID_UTF;
+            }
+
+            utf8proc_encode_char(cp, udst);
+
+            ustr += len;
+            udst += len;
+        }
+
+        *udst = '\0';
+    }
+
+    return UTF8_OK;
+}

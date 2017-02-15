@@ -408,6 +408,27 @@ const char* test_utf_squeeze() {
     return 0;
 }
 
+const char* test_utf_strip() {
+    char s0[] = "exámple  akña";
+    char s1[] = "   exámple  akña   ";
+    char s2[] = "   exámple  akña   ";
+    char s3[] = "   exámple  akña   ";
+    char s10[] = "+é-  exámple  akña  -è+";
+
+    int r = utf8str_strip(NULL, NULL);
+    ut_assert("NULL string", r == UTF8_OK);
+    r = utf8str_strip(s1, NULL);
+    ut_assert("Default strip charset", r == UTF8_OK && strcmp(s1, "exámple  akña") == 0);
+    r = utf8str_lstrip(s2, NULL);
+    ut_assert("Strip spaces from left", r == UTF8_OK && strcmp(s2, "exámple  akña   ") == 0);
+    r = utf8str_rstrip(s3, NULL);
+    ut_assert("Strip spaces from right", r == UTF8_OK && strcmp(s3, "   exámple  akña") == 0);
+    r = utf8str_strip(s10, "+-éè");
+    ut_assert("Strip custom charset", r == UTF8_OK && strcmp(s10, "  exámple  akña  ") == 0);
+
+    return 0;
+}
+
 const char * run_all_test() {
     printf("=== Basic operations ===\n");
     ut_run_test("String Length", test_strlen);
@@ -423,13 +444,14 @@ const char * run_all_test() {
     ut_run_test("Char next and back", test_utf_moving);
     ut_run_test("Reverse", test_utf_reverse);
 
-    printf("=== Extra functions ===\n");
+    printf("\n=== Extra functions ===\n");
     ut_run_test("Title case", test_utf_title_case);
     ut_run_test("Scrub", test_utf_scrub);
     ut_run_test("Word count", test_utf_word_count);
     ut_run_test("Translate", test_utf_translate);
     ut_run_test("Replace tabs", test_utf_tab_replace);
     ut_run_test("Sqeeze", test_utf_squeeze);
+    ut_run_test("Strip", test_utf_strip);
     return 0;
 }
 
