@@ -429,6 +429,21 @@ const char* test_utf_strip() {
     return 0;
 }
 
+const char* test_utf_justify() {
+    char s0[128] = "exámple  akña\0";
+
+    int r = utf8str_rjustify(NULL, NULL, 16);
+    ut_assert("NULL string", r == UTF8_INVALID_ARG);
+    r = utf8str_rjustify(s0, NULL, 9);
+    ut_assert("RJustify too long", r == UTF8_TOO_LONG && strcmp(s0, "exámple  akña") == 0);
+    r = utf8str_rjustify(s0, NULL, 14);
+    ut_assert("RJustify default filler", r == UTF8_OK && strcmp(s0, "exámple  akña ") == 0);
+    r = utf8str_rjustify(s0, "filler", 22);
+    ut_assert("RJustify custom filler", r == UTF8_OK && strcmp(s0, "exámple  akña fillerfi") == 0);
+
+    return 0;
+}
+
 const char * run_all_test() {
     printf("=== Basic operations ===\n");
     ut_run_test("String Length", test_strlen);
@@ -452,6 +467,7 @@ const char * run_all_test() {
     ut_run_test("Replace tabs", test_utf_tab_replace);
     ut_run_test("Sqeeze", test_utf_squeeze);
     ut_run_test("Strip", test_utf_strip);
+    ut_run_test("Justify", test_utf_justify);
     return 0;
 }
 

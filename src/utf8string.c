@@ -1087,3 +1087,36 @@ enum utf8_result utf8str_lstrip(char *str, const char *what) {
 
     return UTF8_OK;
 }
+
+enum utf8_result utf8str_rjustify(char *str, const char *with, size_t sz) {
+    if (str == NULL) {
+        return UTF8_INVALID_ARG;
+    }
+
+    const char *filling = (with == NULL || *with == '\0') ? " " : with;
+    size_t fill_len = utf8str_count(filling);
+    if (fill_len == (size_t)-1) {
+        return UTF8_INVALID_UTF;
+    }
+    size_t str_len = utf8str_count(str);
+    if (str_len == (size_t)-1) {
+        return UTF8_INVALID_UTF;
+    }
+
+    if (str_len > sz) {
+        return UTF8_TOO_LONG;
+    }
+
+    size_t to_add = sz - str_len;
+    while (to_add > 0) {
+        if (to_add >= fill_len) {
+            strcat(str, filling);
+            to_add -= fill_len;
+        } else {
+            strncat(str, filling, to_add);
+            to_add = 0;
+        }
+    }
+
+    return UTF8_OK;
+}

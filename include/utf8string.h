@@ -14,6 +14,7 @@ enum utf8_result {
     UTF8_INVALID_UTF,
     UTF8_UNFINISHED,
     UTF8_TOO_SHORT,
+    UTF8_TOO_LONG,
     UTF8_BUFFER_SMALL,
     UTF8_OUT_OF_MEMORY,
 };
@@ -56,6 +57,7 @@ enum utf8_result utf8str_squeeze(char *str, const char *what);
 enum utf8_result utf8str_strip(char *str, const char *what);
 enum utf8_result utf8str_rstrip(char *str, const char *what);
 enum utf8_result utf8str_lstrip(char *str, const char *what);
+enum utf8_result utf8str_rjustify(char *str, const char *with, size_t sz);
 
 /*
 3. Maybe
