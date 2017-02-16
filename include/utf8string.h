@@ -20,9 +20,41 @@ enum utf8_result {
 };
 
 /* Basic operations */
+
+/**
+ * Returns number of UTF8 characters in the string or (size_t)-1 if str points to invalid UTF8 sequence
+ */
 size_t utf8str_count(const char *str);
+
+/**
+ * Returns number of bytes occupied by the first UTF8 character in the string or
+ *   0 if the str is NULL or points to empty string. There is no checking whether
+ *   UTF string is valid
+ */
 size_t utf8str_char_length(const char *str);
+
+/**
+ * Checks if a string is a valid UTF8 sequence
+ * \param[in] len - number of bytes to test. If len is greater than the string
+ *   lenght or len is 0 then the whole string is tested
+ * Returns one of:
+ *   UTF8_OK - the byte sequence is a valid UTF8 string (or string is empty)
+ *   UTF8_INVALID_ARG - str is NULL
+ *   UTF8_INVALID_UTF - string is not empty and is not a valid UTF8 sequence
+ *   UTF8_UNFINISHED - valid UTF8 sequence ends with incomplete UTF8 character
+ */
+
 enum utf8_result utf8str_is_valid(const char *str, size_t len);
+
+/** Returns pointer to a bytes that starts UTF8 character at position index
+ *  If str is NULL or str points to invalid UTF8 sequence it returns NULL
+ * \param[in] index - character index to find in the string. It can be negative,
+ *   in this case the metod looks for the index from the end of the string. E.g,
+ *   index=-1 means to get a pointer to the last UTF8 character.
+ *   If index exceeds the number of characters in the string than the function
+ *   returns pointer to the trailing zero byte(in case of index is positive) or
+ *   original str(in case of index is negative)
+ */
 const char* utf8str_at_index(const char *str, ssize_t index);
 enum utf8_result utf8str_upcase(const char *src, char *dest, size_t *dest_sz);
 enum utf8_result utf8str_lowcase(const char *src, char *dest, size_t *dest_sz);

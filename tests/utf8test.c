@@ -45,7 +45,8 @@ const char* test_utf_at() {
     char *utfstr = "пример";
 
     ut_assert("NULL string at", utf8str_at_index(NULL, 2) == NULL);
-    ut_assert("Short string at", utf8str_at_index(ascii, 10) == NULL);
+    const char *last = utf8str_at_index(ascii, 10);
+    ut_assert("Short string at", last != NULL && *last == '\0');
     ut_assert("Short string at [negative]", utf8str_at_index(ascii, -10) == ascii);
     ut_assert("ASCII string at", utf8str_at_index(ascii, 5) != NULL && (*utf8str_at_index(ascii, 5) == 'l'));
     ut_assert("ASCII string at [negative]", utf8str_at_index(ascii, -3) != NULL && (*utf8str_at_index(ascii, -3) == 'p'));
@@ -90,7 +91,6 @@ const char* test_utf_cases_inplace() {
     ut_assert("No size case", r == UTF8_OK && strcmp(buf, "EXAMPLE ПРИМЕР") == 0);
     strcpy(buf, str);
     r = utf8str_upcase_inplace(buf, 4);
-    printf("result: %s\n", buf);
     ut_assert("Only 4 first", r == UTF8_OK && strcmp(buf, "EXAMpLe пРимЕр") == 0);
 
     return 0;

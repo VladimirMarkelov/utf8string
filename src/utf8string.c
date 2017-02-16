@@ -130,7 +130,7 @@ const char* utf8str_at_index(const char *str, ssize_t index) {
         }
     }
 
-    return (*tmp ? (char *)tmp : NULL);
+    return (char *)tmp;
 }
 
 typedef utf8proc_int32_t (*utf8str_func) (utf8proc_int32_t);
