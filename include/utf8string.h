@@ -133,7 +133,7 @@ enum utf8_result utf8str_lowcase_inplace(char *src, size_t count);
  */
 enum utf8_result utf8str_equal_no_case(const char *orig, const char *cmp);
 
-/* Checks if UTF8 strings starts with the same characters(ignoring case).
+/* Checks if both UTF8 strings starts with the same characters(ignoring case).
  * \param[in] len - maximum number of characters to compare. If len is 0 then
  *    the function compares the whole strings(as utf8str_equal_no_case does)
  * Returns:
@@ -142,7 +142,21 @@ enum utf8_result utf8str_equal_no_case(const char *orig, const char *cmp);
  *   UTF8_INVALID_UTF - one string(or both strings) has invalid UTF8 sequence
  */
 enum utf8_result utf8str_nequal_no_case(const char *orig, const char *cmp, size_t len);
+
+/* Checks if UTF8 string starts with prefix(casesensitive).
+ * Returns:
+ *   UTF8_EQUAL - strings are the same
+ *   UTF8_NEQUAL - strings differ
+ *   UTF8_INVALID_UTF - one string(or both strings) has invalid UTF8 sequence
+ */
 enum utf8_result utf8str_starts_with(const char *orig, const char *cmp);
+
+/* Checks if UTF8 string ends with suffix(casesensitive).
+ * Returns:
+ *   UTF8_EQUAL - strings are the same
+ *   UTF8_NEQUAL - strings differ
+ *   UTF8_INVALID_UTF - one string(or both strings) has invalid UTF8 sequence
+ */
 enum utf8_result utf8str_ends_with(const char *orig, const char *cmp);
 int utf8str_isdigit(const char *str);
 int utf8str_isspace(const char *str);
