@@ -56,11 +56,91 @@ enum utf8_result utf8str_is_valid(const char *str, size_t len);
  *   original str(in case of index is negative)
  */
 const char* utf8str_at_index(const char *str, ssize_t index);
+
+/** Transforms the string to uppercase letters. It does not change original string
+ * \param[in] src - original string
+ * \param[out] dest - uppercased string will be copied to this buffer
+ * \param[in,out] dest_sz - if dest_sz is NULL or equal 0 then the function does
+ *   no check if the destination size is large enoug letters. It does not change original string
+ *   \param[in] src - original string
+ *   \param[out] dest - uppercased string will be copied to this buffer. It can be NULL, in this
+ *       case the function only tries to transform the source and returns the required size
+ *       for the result(without trailing '\0' character) if dest_sz is not NULL.
+ *   \param[in,out] dest_sz - size of destination is bytes. If dest_sz is NULL or equal 0 then
+ *     the function does no check if the destination size is large enough. If dest_sz is not
+ *     NULL then at the end the function assigns the required size in bytes for the result
+ *     (without ending '\0' character).
+ * Can return:
+ *  UTF8_OK - conversion successful
+ *  UTF8_INVALID_ARG - in case of src is NULL
+ *  UTF8_INVALID_UTF - in case of src is not a valid UTF8 sequence
+ *  UTF8_BUFFER_SMALL - in case of dest_sz is not NULL and is not 0 and it is smaller than
+ *      the space required for the converted string
+ */
 enum utf8_result utf8str_upcase(const char *src, char *dest, size_t *dest_sz);
+
+/** Transforms the string to lowercase letters. It does not change original string
+ * \param[in] src - original string
+ * \param[out] dest - lowercased string will be copied to this buffer
+ * \param[in,out] dest_sz - if dest_sz is NULL or equal 0 then the function does
+ *   no check if the destination size is large enoug letters. It does not change original string
+ *   \param[in] src - original string
+ *   \param[out] dest - uppercased string will be copied to this buffer. It can be NULL, in this
+ *       case the function only tries to transform the source and returns the required size
+ *       for the result(without trailing '\0' character) if dest_sz is not NULL.
+ *   \param[in,out] dest_sz - size of destination is bytes. If dest_sz is NULL or equal 0 then
+ *     the function does no check if the destination size is large enough. If dest_sz is not
+ *     NULL then at the end the function assigns the required size in bytes for the result
+ *     (without ending '\0' character).
+ * Can return:
+ *  UTF8_OK - conversion successful
+ *  UTF8_INVALID_ARG - in case of src is NULL
+ *  UTF8_INVALID_UTF - in case of src is not a valid UTF8 sequence
+ *  UTF8_BUFFER_SMALL - in case of dest_sz is not NULL and is not 0 and it is smaller than
+ *      the space required for the converted string
+ */
 enum utf8_result utf8str_lowcase(const char *src, char *dest, size_t *dest_sz);
+
+/** Transforms the string to uppercase one inplace.
+ * \param[in] count - number of UTF8 characters to transform. If it is 0 then the whole
+ *    string is transformed
+ * Returns:
+ *   UTF8_OK - conversion is successful
+ *   UTF8_INVALID_ARG - str is NULL
+ *   UTF8_INVALID_UTF - str points to the invalid UTF8 sequence
+ *   UTF8_BUFFER_SMALL - if any uppercased characters require more bytes to store than
+ *     original one, the transformation breaks and this error is returned
+ */
 enum utf8_result utf8str_upcase_inplace(char *src, size_t count);
+
+/** Transforms the string to lowercase one inplace.
+ * \param[in] count - number of UTF8 characters to transform. If it is 0 then the whole
+ *    string is transformed
+ * Returns:
+ *   UTF8_OK - conversion is successful
+ *   UTF8_INVALID_ARG - str is NULL
+ *   UTF8_INVALID_UTF - str points to the invalid UTF8 sequence
+ *   UTF8_BUFFER_SMALL - if any lowercased characters require more bytes to store than
+ *     original one, the transformation breaks and this error is returned
+ */
 enum utf8_result utf8str_lowcase_inplace(char *src, size_t count);
+
+/* Checks if two UTF8 strings equal(ignoring case).
+ * Returns:
+ *   UTF8_EQUAL - strings are the same
+ *   UTF8_NEQUAL - strings differ
+ *   UTF8_INVALID_UTF - one string(or both strings) has invalid UTF8 sequence
+ */
 enum utf8_result utf8str_equal_no_case(const char *orig, const char *cmp);
+
+/* Checks if UTF8 strings starts with the same characters(ignoring case).
+ * \param[in] len - maximum number of characters to compare. If len is 0 then
+ *    the function compares the whole strings(as utf8str_equal_no_case does)
+ * Returns:
+ *   UTF8_EQUAL - strings are the same
+ *   UTF8_NEQUAL - strings differ
+ *   UTF8_INVALID_UTF - one string(or both strings) has invalid UTF8 sequence
+ */
 enum utf8_result utf8str_nequal_no_case(const char *orig, const char *cmp, size_t len);
 enum utf8_result utf8str_starts_with(const char *orig, const char *cmp);
 enum utf8_result utf8str_ends_with(const char *orig, const char *cmp);
