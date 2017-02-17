@@ -298,6 +298,15 @@ enum utf8_result utf8str_scrub(char *str, char replace);
 
 /** Returns the number of word in the string or -1 if the string is not a
  *    valid UTF8 sequence
+ *  \param[in] sep - if sep is NULL or empty string then the separator is
+ *    space. Otherwise a new word start after any character from the sep.
+ *    A few separators in a row are considered as one separator.
+ *  Examples:
+ *     utf8str_word_count("abc def hig", NULL) == 3
+ *     utf8str_word_count("abc  def hig", NULL) == 3 (two first spaces are
+ *        calculated as one separator)
+ *     utf8str_word_count("abc,;def;hig", ",;") == 3 (first ',;' is treated as
+ *        one separator)
  */
 int utf8str_word_count(const char *str, const char *sep);
 
