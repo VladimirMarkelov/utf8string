@@ -158,26 +158,181 @@ enum utf8_result utf8str_starts_with(const char *orig, const char *cmp);
  *   UTF8_INVALID_UTF - one string(or both strings) has invalid UTF8 sequence
  */
 enum utf8_result utf8str_ends_with(const char *orig, const char *cmp);
+
+/** Retuns non-zero value if the first character of str is digit
+ * Digit is any character from UTF8 categories:
+ *     Nd - Number, Decimal Digit
+ *     Nl - Number, Letter
+ *     No - Number, Other
+ */
 int utf8str_isdigit(const char *str);
+
+/** Retuns non-zero value if the first character of str is whitespace
+ * Whitespace is any character from UTF8 category Zs (Separator, Space) or
+ *   character with code between 0x09 and 0x0D
+ */
 int utf8str_isspace(const char *str);
+
+/** Retuns non-zero value if the first character of str is of punctiation type
+ * Punctuation is any character from UTF8 categories:
+ *     Pc - Punctuation, Connector
+ *     Pd - Punctuation, Dash
+ *     Pe - Punctuation, Close
+ *     Pf - Punctuation, Final quote
+ *     Pi - Punctuation, Initial quote
+ *     Po - Punctuation, Other
+ *     Ps - Punctuation, Open
+ */
 int utf8str_ispunct(const char *str);
+
+/** Retuns non-zero value if the first character of str is lowcase letter
+ * Lowcase letter is any character from UTF8 categories:
+ *     Ll - Letter, Lowcase
+ */
 int utf8str_islower(const char *str);
+
+/** Retuns non-zero value if the first character of str is uppercase letter
+ * Lowcase letter is any character from UTF8 categories:
+ *     Lu - Letter, Uppercase
+ *     Lt - Letter, Titlecase
+ */
 int utf8str_isupper(const char *str);
+
+/** Retuns non-zero value if the first character of str is control charcter
+ * Control character is any character from UTF8 categories:
+ *     Cc - Other, Control
+ */
 int utf8str_iscntrl(const char *str);
+
+/** Retuns non-zero value if the first character of str is a letter
+ * Letter is any character from UTF8 categories:
+ *     Lu - Letter, Uppercase
+ *     Lt - Letter, Titlecase
+ *     Ll - Letter, Lowercase
+ *     Lo - Letter, Other
+ */
 int utf8str_isalpha(const char *str);
+
+/** Retuns non-zero value if the first character of str is printable
+ * Printable is any character that is not modifier, control, mark, or spacing
+ *    character
+ */
 int utf8str_isprint(const char *str);
+
+/** Returns the total width in monospace characters of the first len UTF8
+ *   characters of the string
+ */
 size_t utf8str_width(const char *str, size_t len);
-int utf8str_substr(const char *str, ssize_t start, ssize_t len, char *dest, size_t *dest_sz);
+
+/** Copies len UTF8 characters from str to dest starting from UTF8 character start.
+ *    \param[in] start - UTF8 index of the first character to copy. If start is
+ *        greater than string length then UTF8_INVALID_ARG is returned
+ *    \param[in] len - number of UTF8 characters to copy. The function copies as
+ *        many characters as possible. So, if len exceeds string length then
+ *        the whole string is copied and UTF8_OK is returned
+ *    \param[in] dest - pointer to buffer to copy the substring. If it is NULL then
+ *       the function just checks if source string is valid and whether dest_sz
+ *       is large enough to keep the substring
+ *    \param[in,out] dest_sz - size of destination buffer in bytes. If it is NULL
+ *       or equal 0 no checks for destination size is done. If it is not 0 then
+ *       the function may return UTF8_BUFFER_SMALL in case of the buffer too
+ *       short to keep the substring. If extracting substring is successful
+ *       and dest_sz is not NULL then the function assigns the number of really
+ *       used bytes for substring to dest_sz(not including the trailing '\0'
+ *       character. So, setting dest to NULL and *dest_sz to 0 you can get how
+ *       big destination should be to store the substring.
+ * Returns UTF8_OK if substring is exctracted without any issue, UTF8_INVALID_UTF
+ *    if the source is not valid UTF8 sequence, or UTF8_BUFFER_SMALL if destination
+ *    size is not big enough to store the substring
+ */
+enum utf8_result utf8str_substr(const char *str, ssize_t start, ssize_t len, char *dest, size_t *dest_sz);
+
+/** Moves pointer to the next UTF8 character in string if it is possible(the
+ *    pointer is not NULL and it does not point to '\0' character). No UTF8
+ *    validation checks are done
+ */
 const char* utf8str_char_next(const char *str);
+
+/** Moves pointer to the next UTF8 character in string if pointer is not NULL.
+ *   No validation checks are done, so the function is dangerous, e.g, in case
+ *   of you call it for the first character
+ */
 const char* utf8str_char_back(const char *str);
+
+/** Moves pointer to the next UTF8 character in string if pointer is not NULL
+ *   and it is not equal stopper pointer.
+ *   Safer version of utf8str_char_back because it allows to set string beginning
+ *   as a stopper, so you never pass string boundaries while going back
+ */
 const char* utf8str_char_back_safe(const char *str, const char *stopper);
 
 /* extra functions */
+
+/** Reverses a string
+ * Retuns:
+ *    UTF8_OK - if the operation completed successfully
+ *    UTF8_INVALID_UTF - if the str is not a valid UTF8 sequence
+ *    UTF8_OUT_OF_MEMORY - the function allocates a temporary buffer for the
+ *      reversed string and if it fails it returns out-of-memory error
+ */
 enum utf8_result utf8str_reverse(char *str);
+
+/** Make the first characher of every word in the string to uppercase
+ * Retuns:
+ *    UTF8_OK - if the operation completed successfully
+ *    UTF8_INVALID_UTF - if the str is not a valid UTF8 sequence
+ */
 enum utf8_result utf8str_titlecase(char *str);
+
+
+/** Make the string a valid UTF8 sequence. If any character is not valid it is
+ *   replaced with 'replace'.
+ *  \param[in] replace - ASCII character to replace every invalid byte. If
+ *    'replace' is '\0' then invalid characters are removed from original string
+ *    instead of being replaced
+ * Retuns:
+ *    UTF8_OK - if the operation completed successfully
+ *    UTF8_INVALID_ARG - if 'replace' is not valid ASCII character (>= 0x80)
+ */
 enum utf8_result utf8str_scrub(char *str, char replace);
+
+/** Returns the number of word in the string or -1 if the string is not a
+ *    valid UTF8 sequence
+ */
 int utf8str_word_count(const char *str, const char *sep);
+
+/** Replace characters from 'what' with corresponding character from 'with'.
+ *     If 'with' is shorter than 'what' then the characters that do not have
+ *     corresponding 'with' characters are just removed from the string. So,
+ *     you can easily eliminate any characters from the string just by setting
+ *     'what' and NULL 'with'.
+ *  \param[in] dst - destination for the transformed string. It can be NULL - in
+ *     this case dst_sz must not be NULL because in this case the function just
+ *     calculates the final size of transformed string and assigns it to dst_sz
+ *  \param[in,out] dst_sz - size in bytes of the destination. If it is NULL or 0
+ *     then no checks for destination size is done. If it is not NULL then after
+ *     the string is transformed a size in bytes of final string(not including
+ *     the trailing '\0') is assigned to dst_sz
+ *  \param[in] what - set of characters to replace. It must not be NULL
+ *  \param[in] with - set of characters to replace with. It can be NULL - in this
+ *     case all characters in 'what' will be deleted from the result string
+ *  Example:
+ *     utf8str_translate("1920", d, NULL, "01", "20") - replaces all '0's to '2's and
+ *         '1's to '0's at the same time. The result string is "0922".
+ *     utf8str_translate("1920", d, NULL, "01", "2") - replaces all '0's to '2's and
+ *         removes all '1's. The result string is "922".
+ *  Returns:
+ *     UTF8_OK - transformation is successful
+ *     UTF8_INVALID_ARG - dst is NULL and dst_sz is NULL at the same time, or
+ *        'with' or 'what' is not valid UTF8 sequence
+ *     UTF8_OUT_OF_MEMORY - the function allocated memory for internal structures,
+ *        so it may fail and return this error
+ *     UTF8_INVALID_UTF - src is not a vaild UTF8 sequence
+ *     UTF8_BUFFER_SMALL - dst_sz is not 0 and it is too small to keep all the
+ *        result string
+ */
 enum utf8_result utf8str_translate(const char *src, char *dst, size_t *dst_sz, const char *what, const char *with);
+
 enum utf8_result utf8str_expand_tabs(const char *str, char *dst, size_t *dst_sz, size_t tab_sz);
 enum utf8_result utf8str_squeeze(char *str, const char *what);
 enum utf8_result utf8str_strip(char *str, const char *what);

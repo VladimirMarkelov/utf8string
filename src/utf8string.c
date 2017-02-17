@@ -496,7 +496,7 @@ size_t utf8str_width(const char *str, size_t len) {
     return width;
 }
 
-int utf8str_substr(const char *str, ssize_t start, ssize_t len, char *dest, size_t *dest_sz) {
+enum utf8_result utf8str_substr(const char *str, ssize_t start, ssize_t len, char *dest, size_t *dest_sz) {
     const char *begin = utf8str_at_index(str, start);
     if (begin == NULL) {
         return UTF8_INVALID_ARG;
