@@ -806,6 +806,7 @@ enum utf8_result utf8str_translate(const char *src, char *dst, size_t *dst_sz, c
     }
 
     size_t used = 0;
+    size_t i;
     utf8proc_uint8_t *usrc = (utf8proc_uint8_t*)src;
     utf8proc_uint8_t *udst = (utf8proc_uint8_t*)dst;
 
@@ -819,7 +820,7 @@ enum utf8_result utf8str_translate(const char *src, char *dst, size_t *dst_sz, c
         }
 
         dcp = cp;
-        for (size_t i = 0; i < whatlen; ++i) {
+        for (i = 0; i < whatlen; ++i) {
             if (whatarr[i] == cp) {
                 dcp = witharr[i];
                 break;
@@ -878,6 +879,7 @@ enum utf8_result utf8str_expand_tabs(const char *src, char *dst, size_t *dst_sz,
     utf8proc_int32_t cp;
     size_t len;
     size_t used = 0;
+    int i;
 
     while (*usrc) {
         len = utf8proc_iterate(usrc, -1, &cp);
@@ -887,7 +889,7 @@ enum utf8_result utf8str_expand_tabs(const char *src, char *dst, size_t *dst_sz,
         }
 
         if (cp == 0x09) {
-            for (int i = 0; i < tab_sz; ++i) {
+            for (i = 0; i < tab_sz; ++i) {
                 if (dst_sz != NULL && *dst_sz != 0 && *dst_sz <= used + 1) {
                     return UTF8_BUFFER_SMALL;
                 }
