@@ -2,7 +2,8 @@
 A C library to manipulate UTF-8 strings. It uses the external library [utf8proc](https://github.com/JuliaLang/utf8proc).
 
 ## Compatibility
-The library was developed on Windows using MinGW toolkit. It works without any issues on Linux (tested on Ubuntu 16.04 LTS).
+The library was developed on Windows(Windows 7) and complied using MinGW toolkit.
+It works without any issues on Linux (tested on Ubuntu 16.04 LTS).
 
 ## Basic functions
 
