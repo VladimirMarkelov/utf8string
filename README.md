@@ -1,4 +1,4 @@
-#UTF8String library
+# UTF8String library ![](https://travis-ci.org/VladimirMarkelov/utf8string.svg?branch=master)
 A C library to manipulate UTF-8 strings. It uses the external library [utf8proc](https://github.com/JuliaLang/utf8proc).
 
 ## Compatibility
