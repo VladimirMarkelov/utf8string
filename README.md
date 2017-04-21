@@ -1,6 +1,9 @@
 #UTF8String library
 A C library to manipulate UTF-8 strings. It uses the external library [utf8proc](https://github.com/JuliaLang/utf8proc).
 
+## Compatibility
+The library was developed on Windows using MinGW toolkit. It works without any issues on Linux (tested on Ubuntu 16.04).
+
 ## Basic functions
 
 * utf8str_count - Returns number of UTF8 characters in the string or (size_t)-1 if str points to invalid UTF8 sequence
