@@ -2,7 +2,7 @@
 A C library to manipulate UTF-8 strings. It uses the external library [utf8proc](https://github.com/JuliaLang/utf8proc).
 
 ## Compatibility
-The library was developed on Windows using MinGW toolkit. It works without any issues on Linux (tested on Ubuntu 16.04).
+The library was developed on Windows using MinGW toolkit. It works without any issues on Linux (tested on Ubuntu 16.04 LTS).
 
 ## Basic functions
 
@@ -35,7 +35,7 @@ The library was developed on Windows using MinGW toolkit. It works without any i
 * utf8str_lstrip - Removes characters (spaces by default) from left end
 * utf8str_rjustify - Adds a characters from the right until the string reaches certain length
 
-## A set of function that similar to C ones but the following works with UTF8 characters. 
+## A set of function that similar to C ones but the following works with UTF8 characters.
 All these functions works always with the first UTF8 character in the string *str*
 
 * utf8str_isdigit
