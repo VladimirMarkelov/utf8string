@@ -431,6 +431,7 @@ const char* test_utf_strip() {
 
 const char* test_utf_justify() {
     char s0[128] = "exámple  akña\0";
+    char s1[128] = "exámple  akña\0";
 
     int r = utf8str_rjustify(NULL, NULL, 16);
     ut_assert("NULL string", r == UTF8_INVALID_ARG);
@@ -440,6 +441,17 @@ const char* test_utf_justify() {
     ut_assert("RJustify default filler", r == UTF8_OK && strcmp(s0, "exámple  akña ") == 0);
     r = utf8str_rjustify(s0, "filler", 22);
     ut_assert("RJustify custom filler", r == UTF8_OK && strcmp(s0, "exámple  akña fillerfi") == 0);
+
+    r = utf8str_ljustify(NULL, NULL, 16);
+    ut_assert("NULL string", r == UTF8_INVALID_ARG);
+    r = utf8str_ljustify(s1, NULL, 9);
+    ut_assert("LJustify too long", r == UTF8_TOO_LONG && strcmp(s1, "exámple  akña") == 0);
+    r = utf8str_ljustify(s1, NULL, 15);
+    ut_assert("LJustify default filler", r == UTF8_OK && strcmp(s1, "  exámple  akña") == 0);
+    r = utf8str_ljustify(s1, "filler", 23);
+    ut_assert("LJustify custom filler", r == UTF8_OK && strcmp(s1, "fillerfi  exámple  akña") == 0);
+    r = utf8str_ljustify(s1, "filler", 29);
+    ut_assert("LJustify custom filler", r == UTF8_OK && strcmp(s1, "fillerfillerfi  exámple  akña") == 0);
 
     return 0;
 }

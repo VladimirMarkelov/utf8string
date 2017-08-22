@@ -1122,3 +1122,46 @@ enum utf8_result utf8str_rjustify(char *str, const char *with, size_t sz) {
 
     return UTF8_OK;
 }
+
+enum utf8_result utf8str_ljustify(char *str, const char *with, size_t sz) {
+    if (str == NULL) {
+        return UTF8_INVALID_ARG;
+    }
+
+    const char *filling = (with == NULL || *with == '\0') ? " " : with;
+    size_t fill_len = utf8str_count(filling);
+    if (fill_len == (size_t)-1) {
+        return UTF8_INVALID_UTF;
+    }
+    size_t str_len = utf8str_count(str);
+    if (str_len == (size_t)-1) {
+        return UTF8_INVALID_UTF;
+    }
+
+    if (str_len > sz) {
+        return UTF8_TOO_LONG;
+    }
+
+    size_t add_cnt = (sz - str_len - 1) / fill_len + 1;
+    size_t total_bytes = strlen(str) + add_cnt * strlen(filling) + 1;
+    char *new_value = (char *)malloc(total_bytes);
+    if (new_value == NULL)
+        return UTF8_OUT_OF_MEMORY;
+
+    *new_value = '\0';
+    size_t to_add = sz - str_len;
+    while (to_add > 0) {
+        if (to_add >= fill_len) {
+            strcat(new_value, filling);
+            to_add -= fill_len;
+        } else {
+            strncat(new_value, filling, to_add);
+            to_add = 0;
+        }
+    }
+    strcat(new_value, str);
+    strcpy(str, new_value);
+    free(new_value);
+
+    return UTF8_OK;
+}

@@ -348,6 +348,7 @@ enum utf8_result utf8str_strip(char *str, const char *what);
 enum utf8_result utf8str_rstrip(char *str, const char *what);
 enum utf8_result utf8str_lstrip(char *str, const char *what);
 enum utf8_result utf8str_rjustify(char *str, const char *with, size_t sz);
+enum utf8_result utf8str_ljustify(char *str, const char *with, size_t sz);
 
 /*
 3. Maybe
