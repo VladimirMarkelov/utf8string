@@ -324,6 +324,8 @@ const char* test_utf_word_count() {
     ut_assert("UTF word count - line end", r == 4);
     r = utf8str_word_count(ascii_ex, NULL);
     ut_assert("ASCII word count - ext ascii", r == 3);
+    r = utf8str_word_count("one_word", NULL);
+    ut_assert("ASCII word count - one word", r == 1);
 
     return 0;
 }
@@ -432,6 +434,13 @@ const char* test_utf_strip() {
 const char* test_utf_justify() {
     char s0[128] = "exámple  akña\0";
     char s1[128] = "exámple  akña\0";
+    char s2[128] = "exámple  akña\0";
+    char s3[128] = "exámple  akña  some  text  два\0";
+    char s4[128] = "exámple  akña  some  text  два\0";
+    char short_str[16] = "example";
+    char short_str2[16] = " exam ";
+    char short_str3[16] = " example ";
+    size_t clen = utf8str_count(s3);
 
     int r = utf8str_rjustify(NULL, NULL, 16);
     ut_assert("NULL string", r == UTF8_INVALID_ARG);
@@ -452,6 +461,39 @@ const char* test_utf_justify() {
     ut_assert("LJustify custom filler", r == UTF8_OK && strcmp(s1, "fillerfi  exámple  akña") == 0);
     r = utf8str_ljustify(s1, "filler", 29);
     ut_assert("LJustify custom filler", r == UTF8_OK && strcmp(s1, "fillerfillerfi  exámple  akña") == 0);
+
+    r = utf8str_justify(NULL, NULL, 16);
+    ut_assert("NULL string", r == UTF8_INVALID_ARG);
+    r = utf8str_justify(s2, NULL, 9);
+    ut_assert("Justify too long", r == UTF8_TOO_LONG && strcmp(s2, "exámple  akña") == 0);
+    r = utf8str_justify(s2, NULL, 16);
+    ut_assert("Justify default filler", r == UTF8_OK && strcmp(s2, " exámple  akña  ") == 0);
+    r = utf8str_justify(s2, "filler", 23);
+    ut_assert("Justify custom filler", r == UTF8_OK && strcmp(s2, "fil exámple  akña  fill") == 0);
+    r = utf8str_justify(s2, "filler", 35);
+    ut_assert("Justify custom filler", r == UTF8_OK && strcmp(s2, "fillerfil exámple  akña  fillfiller") == 0);
+
+    r = utf8str_mjustify(NULL, 16);
+    ut_assert("NULL string", r == UTF8_INVALID_ARG);
+    r = utf8str_mjustify(short_str,  9);
+    ut_assert("MJustify no words", r == UTF8_NO_WORDS && strcmp(short_str, "example") == 0);
+    r = utf8str_mjustify(short_str2,  9);
+    ut_assert("MJustify no words - 2", r == UTF8_NO_WORDS && strcmp(short_str2, " exam ") == 0);
+    r = utf8str_mjustify(short_str3,  9);
+    ut_assert("MJustify no words - 3", r == UTF8_OK && strcmp(short_str3, " example ") == 0);
+    r = utf8str_mjustify(s3,  9);
+    ut_assert("MJustify too long", r == UTF8_TOO_LONG && strcmp(s3, "exámple  akña  some  text  два") == 0);
+    r = utf8str_mjustify(s3, clen + 3);
+    ut_assert("MJustify less than word count", r == UTF8_OK && strcmp(s3, "exámple  akña   some   text   два") == 0);
+    strcpy(s3, s4);
+    r = utf8str_mjustify(s3, clen + 5);
+    ut_assert("MJustify greater than word count by 1", r == UTF8_OK && strcmp(s3, "exámple   akña   some   text    два") == 0);
+    strcpy(s3, s4);
+    r = utf8str_mjustify(s3, clen + 4);
+    ut_assert("MJustify equal fill", r == UTF8_OK && strcmp(s3, "exámple   akña   some   text   два") == 0);
+    strcpy(s3, s4);
+    r = utf8str_mjustify(s3, clen + 10);
+    ut_assert("MJustify greater than word count by some", r == UTF8_OK && strcmp(s3, "exámple    akña     some    text     два") == 0);
 
     return 0;
 }

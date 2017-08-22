@@ -201,7 +201,7 @@ static enum utf8_result process_utf8str_inplace(char *src, utf8str_func fn, size
         return UTF8_INVALID_ARG;
     }
 
-    size_t len = 0, used = 0, lendst, processed = 0;
+    size_t len = 0, lendst, processed = 0;
     utf8proc_uint8_t *usrc = (utf8proc_uint8_t*)src;
     utf8proc_uint8_t *udst = (utf8proc_uint8_t*)src;
     utf8proc_int32_t cpsrc, cpdst;
@@ -353,7 +353,7 @@ static utf8proc_category_t utf8str_get_category(const char *str) {
 
     utf8proc_uint8_t *ustr = (utf8proc_uint8_t*)str;
     utf8proc_int32_t cp;
-    size_t cnt = utf8proc_iterate(ustr, -1, &cp);
+    utf8proc_iterate(ustr, -1, &cp);
     if (cp == -1) {
         return -1;
     }
@@ -600,7 +600,6 @@ enum utf8_result utf8str_reverse(char *str) {
     }
 
     char *stopper = str;
-    size_t cnt;
     utf8proc_uint8_t *ustr = (utf8proc_uint8_t*)copy;
     utf8proc_int32_t cp;
     char *dup = str + sz;
@@ -1165,3 +1164,129 @@ enum utf8_result utf8str_ljustify(char *str, const char *with, size_t sz) {
 
     return UTF8_OK;
 }
+
+enum utf8_result utf8str_justify(char *str, const char *with, size_t sz) {
+    if (str == NULL) {
+        return UTF8_INVALID_ARG;
+    }
+
+    const char *filling = (with == NULL || *with == '\0') ? " " : with;
+    size_t fill_len = utf8str_count(filling);
+    if (fill_len == (size_t)-1) {
+        return UTF8_INVALID_UTF;
+    }
+    size_t str_len = utf8str_count(str);
+    if (str_len == (size_t)-1) {
+        return UTF8_INVALID_UTF;
+    }
+
+    if (str_len > sz) {
+        return UTF8_TOO_LONG;
+    }
+
+    size_t add_cnt = sz - str_len;
+    size_t left_add = add_cnt / 2;
+
+    enum utf8_result res = utf8str_rjustify(str, filling, sz - left_add);
+    if (res != UTF8_OK)
+        return res;
+    res = utf8str_ljustify(str, filling, sz);
+
+    return res;
+}
+
+enum utf8_result utf8str_mjustify(char *str, size_t sz) {
+    if (str == NULL) {
+        return UTF8_INVALID_ARG;
+    }
+    size_t str_len = utf8str_count(str);
+    if (str_len == (size_t)-1) {
+        return UTF8_INVALID_UTF;
+    }
+    if (str_len > sz) {
+        return UTF8_TOO_LONG;
+    }
+    if (str_len == sz)
+        return UTF8_OK;
+
+    size_t word_count = utf8str_word_count(str, " ");
+    if (word_count < 2)
+        return UTF8_NO_WORDS;
+
+    size_t new_size = (strlen(str) + sz - str_len + 1) * sizeof(char);
+    char *new_str = (char *)malloc(new_size);
+    if (new_str == NULL)
+        return UTF8_OUT_OF_MEMORY;
+    new_str[new_size - 1] = '\0';
+
+    float step = (float)(sz - str_len) / (float)(word_count - 1);
+    float curr = 0.0f;
+    int space_left = sz - str_len;
+    int words_left = word_count - 1;
+
+    utf8proc_uint8_t *usrc = (utf8proc_uint8_t*)str;
+    utf8proc_uint8_t *udst = (utf8proc_uint8_t*)new_str;
+    utf8proc_int32_t cpsrc, cpdst;
+    size_t lendst, len;
+
+    enum utf8_result res = UTF8_OK;
+    while (space_left > 0 && *usrc != '\0') {
+        size_t extra = (int)curr;
+        curr -= (float)extra;
+        space_left -= extra;
+
+        cpdst = 0x20;
+        while (extra) {
+            lendst = utf8proc_encode_char(cpdst, udst);
+            udst += lendst;
+            --extra;
+        }
+
+        do {
+            len = utf8proc_iterate(usrc, -1, &cpsrc);
+            if (cpsrc == -1) {
+                res = UTF8_INVALID_UTF;
+                break;
+            }
+
+            if (cpsrc == 0x20) {
+                lendst = utf8proc_encode_char(cpsrc, udst);
+                udst += lendst;
+                usrc += len;
+            }
+        } while (cpsrc == 0x20);
+
+        if (res != UTF8_OK)
+            break;
+
+        do {
+            len = utf8proc_iterate(usrc, -1, &cpsrc);
+            if (cpsrc == -1) {
+                res = UTF8_INVALID_UTF;
+                break;
+            }
+
+            if (cpsrc == 0x20 || cpsrc == 0x00)
+                break;
+
+            lendst = utf8proc_encode_char(cpsrc, udst);
+            udst += lendst;
+            usrc += len;
+        } while (cpsrc != 0x00);
+
+        if (res != UTF8_OK)
+            break;
+
+        --words_left;
+        curr += step;
+        if (words_left == 0)
+            curr = space_left;
+    }
+    *udst = '\0';
+
+    if (res == UTF8_OK)
+        strcpy(str, new_str);
+    free(new_str);
+    return res;
+}
+

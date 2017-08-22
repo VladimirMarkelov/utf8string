@@ -17,6 +17,7 @@ enum utf8_result {
     UTF8_TOO_LONG,
     UTF8_BUFFER_SMALL,
     UTF8_OUT_OF_MEMORY,
+    UTF8_NO_WORDS,
 };
 
 /* Basic operations */
@@ -334,7 +335,7 @@ int utf8str_word_count(const char *str, const char *sep);
  *     UTF8_OK - transformation is successful
  *     UTF8_INVALID_ARG - dst is NULL and dst_sz is NULL at the same time, or
  *        'with' or 'what' is not valid UTF8 sequence
- *     UTF8_OUT_OF_MEMORY - the function allocated memory for internal structures,
+ *     UTF8_OUT_OF_MEMORY - the function allocates memory for internal structures,
  *        so it may fail and return this error
  *     UTF8_INVALID_UTF - src is not a vaild UTF8 sequence
  *     UTF8_BUFFER_SMALL - dst_sz is not 0 and it is too small to keep all the
@@ -342,20 +343,132 @@ int utf8str_word_count(const char *str, const char *sep);
  */
 enum utf8_result utf8str_translate(const char *src, char *dst, size_t *dst_sz, const char *what, const char *with);
 
+/** Replaces all TABs to tab_sz number of spaces and put the result to dst
+ *  \param[in] src - a source UTF8 string with TABs
+ *  \param[out] dst - a result UTF8 string with spaces. If dst is NULL and
+ *      dst_sz is not NULL then the function just calculates how much space
+ *      a new string requires and sets dst_sz with required size
+ *  \param[in,out] dst_sz - a buffer size, set it to NULL if you want to get the
+ *      size of result string
+ *  \param[in] tab_sz - a size of a TAB is space characters
+ *  Returns:
+ *     UTF8_OK - transformation is successful
+ *     UTF8_INVALID_ARG - dst is NULL and dst_sz is NULL at the same time, or
+ *        tab_sz == 0 or tab_sz > 128
+ *        so it may fail and return this error
+ *     UTF8_INVALID_UTF - src is not a vaild UTF8 sequence
+ *     UTF8_BUFFER_SMALL - dst_sz is not 0 and it is too small to keep all the
+ *        result string
+ */
 enum utf8_result utf8str_expand_tabs(const char *str, char *dst, size_t *dst_sz, size_t tab_sz);
+
+/** Deletes adjacent repeated characters. If what is empty or NULL then it deletes
+ *      all repeated characters, otherwise it deletes only repeated characters
+ *      that are in what string
+ *  \param[in,out] str - a UTF8 string that will be replaced in the end
+ *  \param[in] what - a set of characters to replace
+ *  Returns:
+ *     UTF8_OK - transformation is successful
+ *     UTF8_INVALID_UTF - src is not a vaild UTF8 sequence
+ *  Examples:
+ *      utf8str_squeeze("exxa  mple", NULL) == "exa mple"
+ *      utf8str_squeeze("exxxammmpppple", "xp") == "exammmple"
+ */
 enum utf8_result utf8str_squeeze(char *str, const char *what);
+
+/** Trims a string from both ends. At first it tries to trim from right and
+ *      if it was successful it trims from left
+ *  \param[in,out] str - a UTF8 string that will be replaced in the end
+ *  \param[in] what - a set of characters to trim. If it is empty or NULL then
+ *      the function trims all UTF8 space characters (space, CR, LF, TAB etc)
+ *  Returns:
+ *     UTF8_OK - transformation is successful
+ *     UTF8_INVALID_UTF - src is not a vaild UTF8 sequence
+ *  Examples:
+ *      utf8str_strip("\rexample \0x09 \n", NULL) == "example"
+ *      utf8str_strip("examples", "osle") == "examp"
+ */
 enum utf8_result utf8str_strip(char *str, const char *what);
+/** See utf8str_strip */
 enum utf8_result utf8str_rstrip(char *str, const char *what);
+/** See utf8str_strip */
 enum utf8_result utf8str_lstrip(char *str, const char *what);
+
+/** Adds a characters to the end of a string until its length reaches sz
+ *  \param[in,out] str - a UTF8 string that will be replaced in the end
+ *  \param[in] with - a filler. If it is empty or NULL then space character
+ *      is used to fill the string
+ *  \param[in] sz - a required string length
+ *  Returns:
+ *     UTF8_OK - transformation is successful
+ *     UTF8_INVALID_ARG - src is NULL
+ *     UTF8_TOO_LONG - a string is already longer than sz (not an error, just
+ *      an informative warning)
+ *     UTF8_INVALID_UTF - src is not a vaild UTF8 sequence
+ *  Examples:
+ *      utf8str_rjustify("example", NULL, 9) == "example  "
+ *      utf8str_rjustify("example", " *>", 12) == "example *> *"
+ */
 enum utf8_result utf8str_rjustify(char *str, const char *with, size_t sz);
+
+/** Adds a characters to the beginning of a string until its length reaches sz
+ *  \param[in,out] str - a UTF8 string that will be replaced in the end
+ *  \param[in] with - a filler. If it is empty or NULL then space character
+ *      is used to fill the string
+ *  \param[in] sz - a required string length
+ *  Returns:
+ *     UTF8_OK - transformation is successful
+ *     UTF8_INVALID_ARG - src is NULL
+ *     UTF8_TOO_LONG - a string is already longer than sz (not an error, just
+ *      an informative warning)
+ *     UTF8_INVALID_UTF - src is not a vaild UTF8 sequence
+ *     UTF8_OUT_OF_MEMORY - the function allocates memory for internal structures,
+ *        so it may fail and return this error
+ *  Examples:
+ *      utf8str_ljustify("example", NULL, 9) == "  example"
+ *      utf8str_ljustify("example", " *>", 12) == " *> *example"
+ */
 enum utf8_result utf8str_ljustify(char *str, const char *with, size_t sz);
+
+/** Adds a characters from both ends of a string until its length reaches sz.
+ *      If the number of characters to add is not even then more is added to
+ *      the end of the string
+ *  \param[in,out] str - a UTF8 string that will be replaced in the end
+ *  \param[in] with - a filler. If it is empty or NULL then space character
+ *      is used to fill the string
+ *  \param[in] sz - a required string length
+ *  Returns:
+ *     UTF8_OK - transformation is successful
+ *     UTF8_INVALID_ARG - src is NULL
+ *     UTF8_TOO_LONG - a string is already longer than sz (not an error, just
+ *      an informative warning)
+ *     UTF8_INVALID_UTF - src is not a vaild UTF8 sequence
+ *     UTF8_OUT_OF_MEMORY - the function allocates memory for internal structures,
+ *        so it may fail and return this error
+ *  Examples:
+ *      utf8str_justify("example", NULL, 10) == "  example "
+ *      utf8str_justify("example", " *>", 12) == " *example *>"
+ */
+enum utf8_result utf8str_justify(char *str, const char *with, size_t sz);
+
+/** Adds a spaces between words until its length reaches sz size.
+ *  \param[in,out] str - a UTF8 string that will be replaced in the end
+ *  \param[in] sz - a required string length
+ *  Returns:
+ *     UTF8_OK - transformation is successful
+ *     UTF8_INVALID_ARG - src is NULL
+ *     UTF8_TOO_LONG - a string is already longer than sz (not an error, just
+ *      an informative warning)
+ *     UTF8_INVALID_UTF - src is not a vaild UTF8 sequence
+ *     UTF8_NO_WORDS - the string does not have space character inside it
+ *  Examples:
+ *      utf8str_justify("example", 10) == "example" and returns UTF8_NO_WORDS
+ *      utf8str_justify("exam exam exam", 16) == "exam  exam  exam"
+ */
+enum utf8_result utf8str_mjustify(char *str, size_t sz);
 
 /*
 3. Maybe
-justify - add spaces between words to make the string *width* if the string is longer than *limit*
-center - add spaces from start and to end until *width* is reached
-right_justify - add spaces to end until *width* is reached
-left_justify - add spaces from start until *width* is reached
 word_iterator
 */
 
