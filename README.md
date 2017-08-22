@@ -5,6 +5,9 @@ A C library to manipulate UTF-8 strings. It uses the external library [utf8proc]
 The library was developed on Windows(Windows 7) and complied using MinGW toolkit.
 It works without any issues on Linux (tested on Ubuntu 16.04 LTS).
 
+## How to use
+Either build the library with CMake and add the static library libutf8string.a and the header utf8string.h to your project. Or just add to your project files utf8proc.h, utf8string.h, utf8proc.c, utf8proc_data.c, and utf8string.c.
+
 ## Basic functions
 
 * utf8str_count - Returns number of UTF8 characters in the string or (size_t)-1 if str points to invalid UTF8 sequence
