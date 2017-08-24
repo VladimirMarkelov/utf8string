@@ -1317,6 +1317,7 @@ struct utf8str_iter_t* utf8str_iter_init(char *str, const char *include,
     if (exclude != NULL) {
         iter->info->exclude = (char *)malloc(strlen(exclude) + 1);
         if (iter->info->exclude == NULL) {
+            free(iter->info);
             free(iter);
             return NULL;
         }
@@ -1324,6 +1325,7 @@ struct utf8str_iter_t* utf8str_iter_init(char *str, const char *include,
     } else if (include != NULL) {
         iter->info->include = (char *)malloc(strlen(include) + 1);
         if (iter->info->include == NULL) {
+            free(iter->info);
             free(iter);
             return NULL;
         }
@@ -1424,6 +1426,7 @@ enum utf8_result utf8str_iter_free(struct utf8str_iter_t *iter) {
         free(iter->info->include);
     free(iter->info);
     iter->info = NULL;
+    free(iter);
 
     return UTF8_OK;
 }
