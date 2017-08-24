@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 2.8)
 
 project(utf8string C)
 
-# make it tunable
-add_definitions(-DDEBUG)
-
 include_directories(include)
 
 file(GLOB headers_ RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
