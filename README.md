@@ -41,6 +41,9 @@ Either build the library with CMake and add the static library libutf8string.a a
 * utf8str_ljustify - Adds characters from the left until the string reaches certain length
 * utf8str_justify - Centers text by adding characters from both ends of the string
 * utf8str_mjustify - Adds spaces in the middle of the string between words evenly until the string reaches certain length
+* utf8str_iter_init - Initializes iterator to extract word by word from the string
+* utf8str_iter_next - Gets the next word from the string
+* utf8str_iter_free - Frees all memory allocated to the iterator
 
 ## A set of function that similar to C ones but the following works with UTF8 characters.
 All these functions works always with the first UTF8 character in the string *str*
