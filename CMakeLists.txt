@@ -10,12 +10,10 @@ include_directories(include)
 file(GLOB headers_ RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     include/utf8proc.h
     include/utf8string.h
-    include/logger.h
 )
 file(GLOB sources_ RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     src/utf8proc.c
     src/utf8string.c
-    src/logger.c
 )
 
 source_group("" FILES ${headers_} ${sources_})
