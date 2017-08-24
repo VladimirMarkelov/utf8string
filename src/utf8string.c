@@ -5,11 +5,12 @@
 #include "utf8proc.h"
 #include "utf8string.h"
 
-#ifdef DEBUG
-    #include "logger.h"
-#endif
-
-#define UTF8_LOGFILE "utf8string.log"
+/* Information about word iterator used only by internal functions */
+struct utf8str_iter_internal_t {
+    utf8proc_uint8_t *ptr;
+    char *include;
+    char *exclude;
+};
 
 size_t utf8str_count(const char *str) {
     if (str == NULL || *str == '\0') {
@@ -1290,3 +1291,139 @@ enum utf8_result utf8str_mjustify(char *str, size_t sz) {
     return res;
 }
 
+struct utf8str_iter_t* utf8str_iter_init(char *str, const char *include,
+        const char *exclude) {
+    if (str == NULL)
+        return NULL;
+    struct utf8str_iter_t* iter =
+        (struct utf8str_iter_t*)(malloc(sizeof(*iter)));
+    if (iter == NULL)
+        return NULL;
+    iter->info = (struct utf8str_iter_internal_t*)malloc(
+            sizeof(struct utf8str_iter_internal_t));
+    if (iter->info == NULL) {
+        free(iter);
+        return NULL;
+    }
+
+    iter->info->ptr = (utf8proc_uint8_t *)str;
+    iter->info->exclude = NULL;
+    iter->info->include = NULL;
+    iter->begin = NULL;
+    iter->end = NULL;
+    iter->char_count = (size_t)-1;
+    iter->result = UTF8_INVALID_ITERATOR;
+
+    if (exclude != NULL) {
+        iter->info->exclude = (char *)malloc(strlen(exclude) + 1);
+        if (iter->info->exclude == NULL) {
+            free(iter);
+            return NULL;
+        }
+        strcpy(iter->info->exclude, exclude);
+    } else if (include != NULL) {
+        iter->info->include = (char *)malloc(strlen(include) + 1);
+        if (iter->info->include == NULL) {
+            free(iter);
+            return NULL;
+        }
+        strcpy(iter->info->include, include);
+    }
+
+    return iter;
+}
+
+enum utf8_result utf8str_iter_next(struct utf8str_iter_t *iter) {
+    if (iter == NULL || iter->info == NULL)
+        return UTF8_INVALID_ITERATOR;
+    if (iter->result == UTF8_NO_WORDS)
+        return UTF8_INVALID_ITERATOR;
+
+    size_t clen;
+    utf8proc_int32_t cp;
+
+    /* skip excluded characters */
+    while (*iter->info->ptr) {
+        clen = utf8proc_iterate(iter->info->ptr, -1, &cp);
+        if (cp == -1) {
+            iter->result = UTF8_NO_WORDS;
+            return UTF8_INVALID_UTF;
+        }
+
+        if (cp == 0)
+            break;
+
+        char srch[5] = {0};
+        utf8proc_encode_char(cp, srch);
+        if (iter->info->include) {
+            if (strstr(iter->info->include, srch) != NULL) {
+                break;
+            }
+        } else if (iter->info->exclude) {
+            if (strstr(iter->info->exclude, srch) == NULL) {
+                break;
+            }
+        } else if (! utf8str_isspace_cp(cp)) {
+            break;
+        }
+
+        iter->info->ptr += clen;
+    }
+
+    if (*iter->info->ptr == '\0') {
+        iter->result = UTF8_NO_WORDS;
+        return UTF8_NO_WORDS;
+    }
+
+    /* look for the word end */
+    iter->begin = (char *)iter->info->ptr;
+    iter->char_count = 0;
+    iter->end = iter->begin;
+    while (*iter->info->ptr) {
+        clen = utf8proc_iterate(iter->info->ptr, -1, &cp);
+        if (cp == -1) {
+            iter->result = UTF8_NO_WORDS;
+            return UTF8_INVALID_UTF;
+        }
+
+        if (cp == 0)
+            break;
+
+        char srch[5] = {0};
+        utf8proc_encode_char(cp, srch);
+        if (iter->info->include) {
+            if (strstr(iter->info->include, srch) == NULL) {
+                break;
+            }
+        } else if (iter->info->exclude) {
+            if (strstr(iter->info->exclude, srch) != NULL) {
+                break;
+            }
+        } else if (utf8str_isspace_cp(cp)) {
+            break;
+        }
+
+        ++iter->char_count;
+        iter->info->ptr += clen;
+        iter->end = (char*)iter->info->ptr;
+    }
+
+    iter->result = UTF8_OK;
+    return UTF8_OK;
+}
+
+enum utf8_result utf8str_iter_free(struct utf8str_iter_t *iter) {
+    if (iter == NULL)
+        return UTF8_OK;
+    if (iter->info == NULL)
+        return UTF8_INVALID_ITERATOR;
+
+    if (iter->info->exclude)
+        free(iter->info->exclude);
+    if (iter->info->include)
+        free(iter->info->include);
+    free(iter->info);
+    iter->info = NULL;
+
+    return UTF8_OK;
+}

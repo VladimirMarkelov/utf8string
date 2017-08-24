@@ -498,6 +498,143 @@ const char* test_utf_justify() {
     return 0;
 }
 
+const char* test_utf_word_iterator() {
+    char s1[32] = "one\0";
+    char s2[32] = "one twoo\0";
+    char s3[32] = "\t one\r two     three \t\0";
+    char s4[32] = "1234 a4512b192жд0786нг\0";
+    char s5[64] = "The test: a-good-one test, that long\0";
+
+    struct utf8str_iter_t* iter;
+    int r;
+    iter = utf8str_iter_init(NULL, NULL, NULL);
+    ut_assert("NULL string", iter == NULL);
+    r = utf8str_iter_next(iter);
+    ut_assert("NULL iterator", r == UTF8_INVALID_ITERATOR);
+    r = utf8str_iter_free(iter);
+    ut_assert("NULL iterator free", r == UTF8_OK);
+
+    iter = utf8str_iter_init(s1, NULL, NULL);
+    ut_assert("One word init", iter != NULL && iter->result == UTF8_INVALID_ITERATOR);
+    r = utf8str_iter_next(iter);
+    ut_assert("One word: first", r == UTF8_OK
+            && iter->begin != NULL && strcmp(s1, iter->begin) == 0
+            && iter->char_count == 3 && *iter->end == '\0');
+    r = utf8str_iter_next(iter);
+    ut_assert("One word: no more", r == UTF8_NO_WORDS);
+    r = utf8str_iter_next(iter);
+    ut_assert("One word: no more invalid iter", r == UTF8_INVALID_ITERATOR);
+    r = utf8str_iter_free(iter);
+    ut_assert("One word iterator free", r == UTF8_OK);
+
+    iter = utf8str_iter_init(s2, NULL, NULL);
+    ut_assert("Two words init", iter != NULL && iter->result == UTF8_INVALID_ITERATOR);
+    r = utf8str_iter_next(iter);
+    ut_assert("Two words: first", r == UTF8_OK
+            && iter->begin != NULL && strcmp(s2, iter->begin) == 0
+            && iter->char_count == 3 && *iter->end == ' '
+            && iter->result == UTF8_OK);
+    r = utf8str_iter_next(iter);
+    ut_assert("Two words: second", r == UTF8_OK
+            && iter->begin != NULL && strcmp(iter->begin, "twoo") == 0
+            && iter->char_count == 4 && *iter->end == '\0'
+            && iter->result == UTF8_OK);
+    r = utf8str_iter_next(iter);
+    ut_assert("Two words: no more", r == UTF8_NO_WORDS && iter->result == UTF8_NO_WORDS);
+    r = utf8str_iter_next(iter);
+    ut_assert("Two words: no more invalid iter", r == UTF8_INVALID_ITERATOR && iter->result == UTF8_NO_WORDS);
+    r = utf8str_iter_free(iter);
+    ut_assert("Two words iterator free", r == UTF8_OK);
+
+    iter = utf8str_iter_init(s3, NULL, NULL);
+    ut_assert("Three words init", iter != NULL && iter->result == UTF8_INVALID_ITERATOR);
+    r = utf8str_iter_next(iter);
+    ut_assert("Three words: first", r == UTF8_OK
+            && iter->begin != NULL && strcmp("one\r two     three \t\0", iter->begin) == 0
+            && iter->char_count == 3 && *iter->end == '\r'
+            && iter->end - iter->begin == 3);
+    r = utf8str_iter_next(iter);
+    ut_assert("Three words: second", r == UTF8_OK
+            && iter->begin != NULL && strcmp(iter->begin, "two     three \t\0") == 0
+            && iter->char_count == 3 && *iter->end == ' '
+            && iter->end - iter->begin == 3);
+    r = utf8str_iter_next(iter);
+    ut_assert("Three words: third", r == UTF8_OK
+            && iter->begin != NULL && strcmp(iter->begin, "three \t\0") == 0
+            && iter->char_count == 5 && *iter->end == ' '
+            && iter->end - iter->begin == 5);
+    r = utf8str_iter_next(iter);
+    ut_assert("Three words: no more", r == UTF8_NO_WORDS);
+    r = utf8str_iter_next(iter);
+    ut_assert("Three words: no more invalid iter", r == UTF8_INVALID_ITERATOR);
+    r = utf8str_iter_free(iter);
+    ut_assert("Three words iterator free", r == UTF8_OK);
+
+    iter = utf8str_iter_init(s4, "1234567890", NULL);
+    ut_assert("Include init", iter != NULL && iter->result == UTF8_INVALID_ITERATOR);
+    r = utf8str_iter_next(iter);
+    ut_assert("Include: first", r == UTF8_OK
+            && iter->begin != NULL && strcmp(s4, iter->begin) == 0
+            && iter->char_count == 4 && *iter->end == ' '
+            && iter->end - iter->begin == 4);
+    r = utf8str_iter_next(iter);
+    ut_assert("Include: second", r == UTF8_OK
+            && iter->begin != NULL && strcmp("4512b192жд0786нг", iter->begin) == 0
+            && iter->char_count == 4 && *iter->end == 'b'
+            && iter->end - iter->begin == 4);
+    r = utf8str_iter_next(iter);
+    ut_assert("Include: third", r == UTF8_OK
+            && iter->begin != NULL && strcmp("192жд0786нг", iter->begin) == 0
+            && iter->char_count == 3 && strcmp(iter->end, "жд0786нг") == 0
+            && iter->end - iter->begin == 3);
+    r = utf8str_iter_next(iter);
+    ut_assert("Include: forth", r == UTF8_OK
+            && iter->begin != NULL && strcmp("0786нг", iter->begin) == 0
+            && iter->char_count == 4 && strcmp(iter->end, "нг") == 0
+            && iter->end - iter->begin == 4);
+    r = utf8str_iter_next(iter);
+    ut_assert("Include: no more", r == UTF8_NO_WORDS);
+    r = utf8str_iter_next(iter);
+    ut_assert("Include: no more invalid iter", r == UTF8_INVALID_ITERATOR);
+    r = utf8str_iter_free(iter);
+    ut_assert("Include iterator free", r == UTF8_OK);
+
+    iter = utf8str_iter_init(s5, NULL, " :,");
+    ut_assert("Exclude init", iter != NULL && iter->result == UTF8_INVALID_ITERATOR);
+    r = utf8str_iter_next(iter);
+    ut_assert("Exclude: first", r == UTF8_OK
+            && iter->begin != NULL && strcmp(s5, iter->begin) == 0
+            && iter->char_count == 3 && *iter->end == ' '
+            && iter->end - iter->begin == 3);
+    r = utf8str_iter_next(iter);
+    ut_assert("Exclude: second", r == UTF8_OK
+            && iter->begin != NULL && strcmp("test: a-good-one test, that long", iter->begin) == 0
+            && iter->char_count == 4 && *iter->end == ':'
+            && iter->end - iter->begin == 4);
+    r = utf8str_iter_next(iter);
+    ut_assert("Exclude: third", r == UTF8_OK
+            && iter->begin != NULL && strcmp("a-good-one test, that long", iter->begin) == 0
+            && iter->char_count == 10 && *iter->end == ' '
+            && iter->end - iter->begin == 10);
+    r = utf8str_iter_next(iter);
+    ut_assert("Exclude: forth", r == UTF8_OK);
+    r = utf8str_iter_next(iter);
+    ut_assert("Exclude: fifth", r == UTF8_OK);
+    r = utf8str_iter_next(iter);
+    ut_assert("Exclude: sixth", r == UTF8_OK
+            && iter->begin != NULL && strcmp("long", iter->begin) == 0
+            && iter->char_count == 4 && *iter->end == '\0'
+            && iter->end - iter->begin == 4);
+    r = utf8str_iter_next(iter);
+    ut_assert("Exclude: no more", r == UTF8_NO_WORDS);
+    r = utf8str_iter_next(iter);
+    ut_assert("Exclude: no more invalid iter", r == UTF8_INVALID_ITERATOR);
+    r = utf8str_iter_free(iter);
+    ut_assert("Exclude iterator free", r == UTF8_OK);
+
+    return 0;
+}
+
 const char * run_all_test() {
     printf("=== Basic operations ===\n");
     ut_run_test("String Length", test_strlen);
@@ -522,9 +659,9 @@ const char * run_all_test() {
     ut_run_test("Sqeeze", test_utf_squeeze);
     ut_run_test("Strip", test_utf_strip);
     ut_run_test("Justify", test_utf_justify);
+    ut_run_test("Word iteration", test_utf_word_iterator);
     return 0;
 }
-
 
 int main() {
     const char* res = run_all_test();

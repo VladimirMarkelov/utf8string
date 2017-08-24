@@ -18,6 +18,39 @@ enum utf8_result {
     UTF8_BUFFER_SMALL,
     UTF8_OUT_OF_MEMORY,
     UTF8_NO_WORDS,
+    UTF8_INVALID_ITERATOR,
+};
+
+struct utf8str_iter_internal_t;
+/** Structure to keep information about word iterator.
+ *  See functions utf8str_iter_*
+ */
+struct utf8str_iter_t {
+    /** Internal information for iterator housekeeping.
+     * Should not be exposed to any client
+     */
+    struct utf8str_iter_internal_t *info;
+    /** Holds the pointer to the first character of the current word. It is
+     *  valid only if result is UTF8_OK
+     */
+    char *begin;
+    /** Holds the pointer to the first character after the current word. It is
+     *  valid only if result is UTF8_OK.
+     */
+    char *end;
+    /** The number of UTF8 characters in the current word - if result is UTF8_OK
+     *  or in the last word if result is UTF8_NO_WORDS.
+     *  To get word size in bytes just subtract begin from end
+     */
+    size_t char_count;
+    /** The result of the last operation. Can be:
+     *  UTF8_OK - the next word was found after calling utf8str_iter_next
+     *  UTF8_NO_WORDS - the end of the string is reached, no word found. In this
+     *      case begin, end, and char_count values are undefined
+     *  UTF8_INVALID_ITERATOR - iterator is initialized but utf8str_iter_next
+     *      has not been called yet, so all others fields are invalid
+     */
+    enum utf8_result result;
 };
 
 /* Basic operations */
@@ -468,9 +501,53 @@ enum utf8_result utf8str_justify(char *str, const char *with, size_t sz);
 enum utf8_result utf8str_mjustify(char *str, size_t sz);
 
 /*
-3. Maybe
-word_iterator
+------------ word iterator functions ----------------------------
+They all should be re-enterant
 */
+/** Initializes a word iterator. Right after calling initialization the
+ *  iterator is in invalid state and cannot be used to get the current word,
+ *  you have to call utf8str_iter_next first.
+ *  \param[in] str - a UTF8 string that will be iterated
+ *  \param[in] include - a set of characters that make a word, all other
+ *      characters are treated as word separators
+ *  \param[in] exclude - a set of characters that are word separators
+ *  Note: if both include and exclude are set then only exclude works. In other
+ *      words, in this case the function works as if include is NULL. If both
+ *      include and exclude are NULL then the function skip all whitespaces
+ *      between words
+ *  Note: initialization makes a copy of include and exclude sets, so it is
+ *      safe to delete them right after an iterator intialization. From the
+ *      other hand, the original string is not copied - be sure to keep the
+ *      original string until you finish iterating
+ *  Returns:
+ *      NULL in case of error (out of memory or original string is NULL)
+ *      or poiner to initalized iterator
+ */
+struct utf8str_iter_t* utf8str_iter_init(char *str, const char *include,
+        const char *exclude);
+/** Finds the next word in the source string. The function does not do any
+ *      memory allocations or copying, it just returns the next word limits that
+ *      can be read from iter fields (See description of structure
+ *      utf8str_iter_t)
+ *  \param[in] iter - an initialized word iterator
+ *  Returns:
+ *     UTF8_OK - freeing memory is successful
+ *     UTF8_INVALID_UTF - src is not a vaild UTF8 sequence
+ *     UTF8_INVALID_ITERATOR - passed iter is NULL, or not initialized, or
+ *      you tries to call next after the end of string is reached
+ *     UTF8_NO_WORDS - the iterator has reached the end of the string. In this
+ *      case no word is found and begin and end pointers are not valid
+ */
+enum utf8_result utf8str_iter_next(struct utf8str_iter_t *iter);
+/** Frees a memory allocated for the iterator by initialization.
+ *  \param[in] iter - an initialized word iterator. It is safe to free a
+ *      pointer that is NULL
+ *  Returns:
+ *     UTF8_OK - freeing memory is successful
+ *     UTF8_INVALID_ITERATOR - passed iter is not NULL but the iterator looks
+ *      like it has been already freed some time ago, or it is broken
+ */
+enum utf8_result utf8str_iter_free(struct utf8str_iter_t *iter);
 
 #ifdef __cplusplus
 }
